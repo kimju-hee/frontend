@@ -36,7 +36,7 @@
                     포트폴리오 List
                 </v-card-sub-title>
                 <li v-for="(id, index) in value.portfolios" :key="index">
-                    {{ id && id. ? id. : '' }}
+                    {{ id }}
                 </li>
             </v-card>
         </div>

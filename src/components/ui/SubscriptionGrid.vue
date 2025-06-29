@@ -18,7 +18,7 @@
                 <v-btn :disabled="!selectedRow" style="margin-left: 5px;" @click="openEditDialog()" class="contrast-primary-text" small color="primary">
                     <v-icon small>mdi-pencil</v-icon>수정
                 </v-btn>
-                <v-btn :disabled="!selectedRow" style="margin-left: 5px;" @click="cancelSubscription" class="contrast-primary-text" small color="primary" :disabled="!hasRole('Subscriber')">
+                <v-btn :disabled="!selectedRow || !hasRole('Subscriber')" style="margin-left: 5px;" @click="cancelSubscription" class="contrast-primary-text" small color="primary">
                     <v-icon small>mdi-minus-circle-outline</v-icon>구독 취소
                 </v-btn>
             </div>

@@ -18,7 +18,7 @@
                 <v-btn :disabled="!selectedRow" style="margin-left: 5px;" @click="openEditDialog()" class="contrast-primary-text" small color="primary">
                     <v-icon small>mdi-pencil</v-icon>수정
                 </v-btn>
-                <v-btn :disabled="!selectedRow" style="margin-left: 5px;" @click="requestPublishDialog = true" class="contrast-primary-text" small color="primary" :disabled="!hasRole('Author')">
+                <v-btn :disabled="!selectedRow || !hasRole('Author')" style="margin-left: 5px;" @click="requestPublishDialog = true" class="contrast-primary-text" small color="primary">
                     <v-icon small>mdi-minus-circle-outline</v-icon>출간 요청
                 </v-btn>
                 <v-dialog v-model="requestPublishDialog" width="500">
