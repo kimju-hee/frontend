@@ -5,7 +5,19 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      component: () => import('../components/pages/Login.vue'),
+    },
+    {
+      path: '/home',
       component: () => import('../components/pages/Index.vue'),
+    },
+    {
+      path: '/admin',
+      component: () => import('../components/pages/AdminHome.vue'),
+    },
+    {
+      path: '/author',
+      component: () => import('../components/pages/AuthorHome.vue'),
     },
     {
       path: '/authors',
