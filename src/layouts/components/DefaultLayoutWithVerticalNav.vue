@@ -1,11 +1,8 @@
 <script setup>
-import { VerticalNavLayout } from '@layouts'
+import { VerticalNavLayout } from '@layouts';
 
 // Components
-import DrawerContent from '@/layouts/components/DrawerContent.vue'
-import Footer from '@/layouts/components/Footer.vue'
-import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
-import UserProfile from '@/layouts/components/UserProfile.vue'
+import DrawerContent from '@/layouts/components/DrawerContent.vue';
 </script>
 
 <template>
@@ -23,9 +20,16 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 
         <VSpacer />
 
-        <NavbarThemeSwitcher class="me-2" />
-
-        <UserProfile />
+        <!-- 👉 Logout button -->
+        <v-btn
+          color="error"
+          variant="outlined"
+          size="small"
+          @click="logout"
+        >
+          <v-icon left>mdi-logout</v-icon>
+          로그아웃
+        </v-btn>
       </div>
     </template>
 
@@ -42,6 +46,18 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
     </template>
   </VerticalNavLayout>
 </template>
+
+<script>
+export default {
+  methods: {
+    logout() {
+      // 로그아웃 처리
+      localStorage.removeItem('userType')
+      this.$router.push('/')
+    }
+  }
+}
+</script>
 
 <style lang="scss" scoped>
 </style>
