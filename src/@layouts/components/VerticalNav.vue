@@ -1,6 +1,7 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useDisplay } from 'vuetify'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   tag: {
@@ -24,6 +25,7 @@ const props = defineProps({
 const { mdAndDown } = useDisplay()
 const refNav = ref()
 const route = useRoute()
+const router = useRouter()
 
 watch(() => route.path, () => {
   props.toggleIsOverlayNavActive(false)
@@ -34,6 +36,21 @@ const updateIsVerticalNavScrolled = val => isVerticalNavScrolled.value = val
 
 const handleNavScroll = evt => {
   isVerticalNavScrolled.value = evt.target.scrollTop > 0
+}
+
+const navigateToHome = () => {
+  const userType = localStorage.getItem('userType')
+  let targetPath = '/'
+  
+  if (userType === 'admin') {
+    targetPath = '/admin-home'
+  } else if (userType === 'author') {
+    targetPath = '/author-home'
+  } else if (userType === 'reader') {
+    targetPath = '/reader-home'
+  }
+  
+  router.push(targetPath)
 }
 </script>
 
@@ -53,15 +70,16 @@ const handleNavScroll = evt => {
     <!-- 👉 Header -->
     <div class="nav-header">
       <slot name="nav-header">
-        <RouterLink
-          to="/"
+        <div
           class="app-logo d-flex align-center gap-x-3 app-title-wrapper"
+          style="cursor: pointer;"
+          @click="navigateToHome"
         >
           <v-icon>mdi-home</v-icon>
           <h1 class="font-weight-medium leading-normal text-xl text-uppercase">
             걷기가서재
           </h1>
-        </RouterLink>
+        </div>
       </slot>
     </div>
     <slot name="before-nav-items">
