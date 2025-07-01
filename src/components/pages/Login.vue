@@ -121,6 +121,8 @@ export default {
       // 관리자 로그인
       if (this.userId === 'admin' && this.password === 'admin') {
         localStorage.setItem('userType', 'admin');
+        localStorage.setItem('userEmail', 'admin');
+        localStorage.setItem('userName', '관리자');
         this.$router.push('/admin');
         return;
       }
@@ -135,6 +137,8 @@ export default {
 
         if (userRes.data && userRes.data.id) {
           localStorage.setItem('userType', 'reader');
+          localStorage.setItem('userEmail', userRes.data.email);
+          localStorage.setItem('userName', userRes.data.name || '');
           this.$router.push('/reader');
           return;
         }
@@ -150,6 +154,8 @@ export default {
 
         if (authorRes.data && authorRes.data.id) {
           localStorage.setItem('userType', 'author');
+          localStorage.setItem('userEmail', authorRes.data.email);
+          localStorage.setItem('userName', authorRes.data.name || '');
           this.$router.push('/author');
           return;
         }
