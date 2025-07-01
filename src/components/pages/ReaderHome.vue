@@ -31,7 +31,8 @@
           <v-card-title class="d-flex justify-space-between align-center">
             <span>월정액 구독</span>
             <div>
-              <v-btn color="primary" @click="buySubscriptionDialog = true">구독권 구매</v-btn>
+              <v-btn v-if="!isPurchase" color="primary" @click="buySubscriptionDialog = true">구독 신청</v-btn>
+              <v-btn v-else color="error" @click="cancelSubscriptionDialog = true">구독 해지</v-btn>
             </div>
           </v-card-title>
           <v-card-text>
@@ -83,10 +84,18 @@
     </v-dialog>
 
     <!-- 구독권 구매 다이얼로그 -->
-    <v-dialog v-model="buySubscriptionDialog" width="500">
+    <v-dialog v-model="buySubscriptionDialog" max-width="400px">
       <BuySubscription
         @closeDialog="buySubscriptionDialog = false"
         @buySubscription="buySubscription"
+      />
+    </v-dialog>
+
+    <!-- 구독 해지 다이얼로그 -->
+    <v-dialog v-model="cancelSubscriptionDialog" max-width="400px">
+      <CancelSubscription
+        @closeDialog="cancelSubscriptionDialog = false"
+        @cancelSubscription="cancelSubscription"
       />
     </v-dialog>
   </v-container>
@@ -95,10 +104,11 @@
 <script>
 import axios from 'axios'
 import BuySubscription from '../BuySubscription.vue'
+import CancelSubscription from '../CancelSubscription.vue'
 
 export default {
   name: 'ReaderHome',
-  components: { BuySubscription },
+  components: { BuySubscription, CancelSubscription },
   data() {
     return {
       userId: localStorage.getItem('userId') || null,
@@ -110,6 +120,7 @@ export default {
       chargePointDialog: false,
       chargeAmount: 1000,
       buySubscriptionDialog: false,
+      cancelSubscriptionDialog: false,
       bookHeaders: [
         { title: '제목', key: 'title', sortable: true },
         { title: '저자', key: 'author' },
@@ -156,9 +167,14 @@ export default {
       this.chargePointDialog = false
     },
     async buySubscription(val) {
-      // TODO: 실제 구독권 구매 API 호출
+      // TODO: 실제 구독 신청 API 호출
       this.isPurchase = val.isPurchase
       this.buySubscriptionDialog = false
+    },
+    async cancelSubscription(val) {
+      // TODO: 실제 구독 해지 API 호출
+      this.isPurchase = val.isPurchase
+      this.cancelSubscriptionDialog = false
     },
     viewBook(item) {
       // TODO: 도서 상세 보기 구현
