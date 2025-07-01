@@ -39,6 +39,10 @@ const router = createRouter({
       path: '/processedResults',
       component: () => import('../components/ProcessedResultView.vue'),
     },
+    {
+      path: '/login',
+      component: () => import('../components/pages/Login.vue'),
+    },
   ],
 })
 
