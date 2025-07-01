@@ -1,31 +1,25 @@
 <template>
-    <v-card outlined style="border-radius: 0; margin-top: 10px; padding-bottom: 10px; background-color: #F4F5FA;">
-    
-        <v-card-text style="margin-top:-10px;">
-            <v-row no-gutters style="margin: 15px 0px -10px -15px;">
-                <v-col style="max-width:140px;">
-                    <Number class="attributes-list" label="Id" v-model="value.parameters.id" :editMode="editMode"/>
+    <v-card outlined class="getbookbyid-card">
+        <v-card-text>
+            <v-row class="getbookbyid-row" no-gutters>
+                <v-col class="getbookbyid-col">
+                    <Number label="Id" v-model.number="value.parameters.id" :editMode="editMode"/>
                 </v-col>
-                <v-col style="max-width:140px;">
-                    <String class="attributes-list" label="도서명" v-model="value.parameters.bookName" :editMode="editMode"/>
+                <v-col class="getbookbyid-col">
+                    <String label="제목" v-model="value.parameters.bookName" :editMode="editMode"/>
                 </v-col>
-                <v-col style="max-width:140px;">
-                    <String class="attributes-list" label="작가명" v-model="value.parameters.authorName" :editMode="editMode"/>
+                <v-col class="getbookbyid-col">
+                    <String label="작가" v-model="value.parameters.authorName" :editMode="editMode"/>
                 </v-col>
-                <v-col style="max-width:140px;">
-                    <String class="attributes-list" label="카테고리" v-model="value.parameters.category" :editMode="editMode"/>
+                <v-col class="getbookbyid-col">
+                    <String label="카테고리" v-model="value.parameters.category" :editMode="editMode"/>
                 </v-col>
-                <v-col style="max-width:140px;">
-                    <Boolean class="attributes-list" label="베스트셀러 여부" v-model="value.parameters.isBestSeller" :editMode="editMode"/>
+                <v-col class="getbookbyid-col">
+                    <Boolean label="베스트셀러 여부" v-model="value.parameters.isBestSeller" :editMode="editMode"/>
                 </v-col>
-                <v-col>
-                    <v-btn class="gs-query-search-btn contrast-primary-text"
-                        @click="search"
-                        small
-                        style="margin-left: 35px; margin-top: 30px;"
-                        color="primary"
-                    >
-                        <v-icon small>mdi-magnify</v-icon>검색
+                <v-col class="getbookbyid-btncol">
+                    <v-btn class="getbookbyid-search-btn" @click="search" small color="primary">
+                        <v-icon small class="mr-2">mdi-magnify</v-icon>검색
                     </v-btn>
                 </v-col>
             </v-row>
@@ -62,9 +56,35 @@
         }
     }
 </script>
-<style>
-.attributes-list{
-    margin-left: 15px;
+
+<style scoped>
+.getbookbyid-card {
+    border-radius: 8px;
+    margin-top: 10px;
+    padding-bottom: 10px;
+    background: #F4F5FA;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.getbookbyid-row {
+    margin: 0;
+    gap: 16px;
+    align-items: flex-end;
+}
+.getbookbyid-col {
+    min-width: 120px;
+    max-width: 180px;
+    flex: 1 1 120px;
+    padding: 0 4px;
+}
+.getbookbyid-btncol {
+    min-width: 120px;
+    display: flex;
+    align-items: flex-end;
+    padding-left: 12px;
+}
+.getbookbyid-search-btn {
+    min-width: 90px;
+    font-weight: 500;
+    box-shadow: none;
 }
 </style>
-
