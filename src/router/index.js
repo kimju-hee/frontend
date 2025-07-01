@@ -39,6 +39,7 @@ const router = createRouter({
       path: '/processedResults',
       component: () => import('../components/ProcessedResultView.vue'),
     },
+    // 페이지 생성
     {
       path: '/login',
       component: () => import('../components/pages/Login.vue'),
@@ -50,6 +51,22 @@ const router = createRouter({
     {
       path: '/reader-home',
       component: () => import('../components/pages/ReaderHome.vue'),
+    },
+    {
+      path: '/admin-home',
+      component: () => import('../components/pages/AdminHome.vue'),
+    },
+    {
+      path: '/author-management',
+      component: () => import('../components/pages/AuthorManagement.vue'),
+    },
+    {
+      path: '/user-management',
+      component: () => import('../components/pages/UserManagement.vue'),
+    },
+    {
+      path: '/book-management',
+      component: () => import('../components/pages/BookManagement.vue'),
     },
   ],
 })
