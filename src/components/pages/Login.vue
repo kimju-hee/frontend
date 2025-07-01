@@ -123,7 +123,7 @@ export default {
         localStorage.setItem('userType', 'admin');
         localStorage.setItem('userEmail', 'admin');
         localStorage.setItem('userName', '관리자');
-        this.$router.push('/admin');
+        this.$router.push('/admin-home');
         return;
       }
       // 독자/작가 로그인
@@ -139,7 +139,7 @@ export default {
           localStorage.setItem('userType', 'reader');
           localStorage.setItem('userEmail', userRes.data.email);
           localStorage.setItem('userName', userRes.data.name || '');
-          this.$router.push('/reader');
+          this.$router.push('/reader-home');
           return;
         }
       } catch (e) {}
@@ -156,7 +156,7 @@ export default {
           localStorage.setItem('userType', 'author');
           localStorage.setItem('userEmail', authorRes.data.email);
           localStorage.setItem('userName', authorRes.data.name || '');
-          this.$router.push('/author');
+          this.$router.push('/author-home');
           return;
         }
       } catch (e) {}
