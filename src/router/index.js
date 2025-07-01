@@ -68,6 +68,10 @@ const router = createRouter({
       path: '/book-management',
       component: () => import('../components/pages/BookManagement.vue'),
     },
+    {
+      path: '/book-list',
+      component: () => import('../components/pages/BookList.vue'),
+    },
   ],
 })
 
