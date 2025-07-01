@@ -13,13 +13,13 @@
                     <String class="attributes-list" label="도서명" v-model="value.parameters.bookName" :editMode="editMode"/>
                 </v-col>
                 <v-col style="max-width:140px;">
+                    <String class="attributes-list" label="작가명" v-model="value.parameters.authorName" :editMode="editMode"/>
+                </v-col>
+                <v-col style="max-width:140px;">
                     <String class="attributes-list" label="카테고리" v-model="value.parameters.category" :editMode="editMode"/>
                 </v-col>
                 <v-col style="max-width:140px;">
-                    <Boolean class="attributes-list" label="베스트셀러여부" v-model="value.parameters.isBestSeller" :editMode="editMode"/>
-                </v-col>
-                <v-col style="max-width:140px;">
-                    <String class="attributes-list" label="작가명" v-model="value.parameters.authorName" :editMode="editMode"/>
+                    <Boolean class="attributes-list" label="베스트셀러 여부" v-model="value.parameters.isBestSeller" :editMode="editMode"/>
                 </v-col>
                 <v-col>
                     <v-btn class="gs-query-search-btn contrast-primary-text"

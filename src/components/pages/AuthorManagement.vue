@@ -53,9 +53,9 @@
                             <td class="font-semibold">{{ idx + 1 }}</td>
                             <td class="whitespace-nowrap" label="작가명">{{ val.authorName }}</td>
                             <td class="whitespace-nowrap" label="작가 소개">{{ val.introduction }}</td>
-                            <td class="whitespace-nowrap" label="대표작">{{ val.feturedWorks }}</td>
+                            <td class="whitespace-nowrap" label="대표작">{{ val.featuredWorks }}</td>
                             <td class="whitespace-nowrap" label="Email">{{ val.email }}</td>
-                            <td class="whitespace-nowrap" label="승인 여부">{{ val.isApprove }}</td>
+                            <td class="whitespace-nowrap" label="승인 여부">{{ val.isApprove ? '승인' : '미승인' }}</td>
                             <v-row class="ma-0 pa-4 align-center">
                                 <v-spacer></v-spacer>
                                 <Icon style="cursor: pointer;" icon="mi:delete" @click="deleteRow(val)" />

@@ -6,7 +6,7 @@
         <div class="d-flex align-center justify-space-between">
           <div>
             <h1 class="text-h4 font-weight-bold mb-2">
-              {{ userName }}님, 오늘은 어떤 책을 읽을까요?
+              {{ userName }}님, 환영합니다!
             </h1>
           </div>
         </div>
@@ -31,13 +31,12 @@
           <v-card-title class="d-flex justify-space-between align-center">
             <span>월정액 구독</span>
             <div>
-              <v-btn v-if="!isSubscribed" color="primary" @click="subscribeDialog = true">구독 신청</v-btn>
-              <v-btn v-else color="error" @click="unsubscribeDialog = true">구독 해지</v-btn>
+              <v-btn color="primary" @click="buySubscriptionDialog = true">구독권 구매</v-btn>
             </div>
           </v-card-title>
           <v-card-text>
             <div class="text-h5 font-weight-bold">
-              {{ isSubscribed ? '구독 중' : '미구독' }}
+              {{ isPurchase ? '구독 중' : '미구독' }}
             </div>
           </v-card-text>
         </v-card>
@@ -83,49 +82,34 @@
       </v-card>
     </v-dialog>
 
-    <!-- 구독 신청 다이얼로그 -->
-    <v-dialog v-model="subscribeDialog" max-width="400px">
-      <v-card>
-        <v-card-title>월정액 구독 신청</v-card-title>
-        <v-card-text>월정액 구독을 신청하시겠습니까?</v-card-text>
-        <v-card-actions>
-          <v-btn text @click="subscribeDialog = false">취소</v-btn>
-          <v-btn color="primary" @click="subscribe">신청</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- 구독 해지 다이얼로그 -->
-    <v-dialog v-model="unsubscribeDialog" max-width="400px">
-      <v-card>
-        <v-card-title>월정액 구독 해지</v-card-title>
-        <v-card-text>정말로 구독을 해지하시겠습니까?</v-card-text>
-        <v-card-actions>
-          <v-btn text @click="unsubscribeDialog = false">취소</v-btn>
-          <v-btn color="error" @click="unsubscribe">해지</v-btn>
-        </v-card-actions>
-      </v-card>
+    <!-- 구독권 구매 다이얼로그 -->
+    <v-dialog v-model="buySubscriptionDialog" width="500">
+      <BuySubscription
+        @closeDialog="buySubscriptionDialog = false"
+        @buySubscription="buySubscription"
+      />
     </v-dialog>
   </v-container>
 </template>
 
 <script>
 import axios from 'axios'
+import BuySubscription from '../BuySubscription.vue'
 
 export default {
   name: 'ReaderHome',
+  components: { BuySubscription },
   data() {
     return {
       userId: localStorage.getItem('userId') || null,
       userName: '',
       point: 0,
-      isSubscribed: false,
+      isPurchase: false,
       rentedBooks: [],
       loadingBooks: false,
       chargePointDialog: false,
       chargeAmount: 1000,
-      subscribeDialog: false,
-      unsubscribeDialog: false,
+      buySubscriptionDialog: false,
       bookHeaders: [
         { title: '제목', key: 'title', sortable: true },
         { title: '저자', key: 'author' },
@@ -154,7 +138,7 @@ export default {
     async fetchSubscription() {
       // TODO: 실제 API로 구독 여부 조회
       // 임시
-      this.isSubscribed = false
+      this.isPurchase = false
     },
     async fetchRentedBooks() {
       this.loadingBooks = true
@@ -171,15 +155,10 @@ export default {
       this.point += this.chargeAmount
       this.chargePointDialog = false
     },
-    async subscribe() {
-      // TODO: 실제 구독 신청 API 호출
-      this.isSubscribed = true
-      this.subscribeDialog = false
-    },
-    async unsubscribe() {
-      // TODO: 실제 구독 해지 API 호출
-      this.isSubscribed = false
-      this.unsubscribeDialog = false
+    async buySubscription(val) {
+      // TODO: 실제 구독권 구매 API 호출
+      this.isPurchase = val.isPurchase
+      this.buySubscriptionDialog = false
     },
     viewBook(item) {
       // TODO: 도서 상세 보기 구현

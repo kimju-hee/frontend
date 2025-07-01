@@ -24,9 +24,9 @@
                         <tr>
                         <th>Id</th>
                         <th>도서명</th>
-                        <th>카테고리</th>
-                        <th>베스트셀러여부</th>
                         <th>작가명</th>
+                        <th>카테고리</th>
+                        <th>베스트셀러 여부</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,9 +37,9 @@
                         >
                             <td class="font-semibold">{{ idx + 1 }}</td>
                             <td class="whitespace-nowrap" label="도서명">{{ val.bookName }}</td>
-                            <td class="whitespace-nowrap" label="카테고리">{{ val.category }}</td>
-                            <td class="whitespace-nowrap" label="베스트셀러여부">{{ val.isBestSeller }}</td>
                             <td class="whitespace-nowrap" label="작가명">{{ val.authorName }}</td>
+                            <td class="whitespace-nowrap" label="카테고리">{{ val.category }}</td>
+                            <td class="whitespace-nowrap" label="베스트셀러 여부">{{ val.isBestSeller }}</td>
                         </tr>
                     </tbody>
                 </v-table>
