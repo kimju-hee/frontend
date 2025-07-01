@@ -47,6 +47,10 @@ const router = createRouter({
       path: '/author-home',
       component: () => import('../components/pages/AuthorHome.vue'),
     },
+    {
+      path: '/reader-home',
+      component: () => import('../components/pages/ReaderHome.vue'),
+    },
   ],
 })
 
