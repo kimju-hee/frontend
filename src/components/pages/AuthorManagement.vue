@@ -1,37 +1,28 @@
 <template>
     <v-container>
-        <v-snackbar
-            v-model="snackbar.status"
-            :timeout="snackbar.timeout"
-            :color="snackbar.color"
-        >
-            
-            <v-btn style="margin-left: 80px;" text @click="snackbar.status = false">
-                Close
-            </v-btn>
-        </v-snackbar>
         <div class="panel">
-            <div class="gs-bundle-of-buttons" style="max-height:10vh;">
-                <v-btn :disabled="!selectedRow || !hasRole('Admin')" style="margin-left: 5px;" @click="approveAuthorDialog = true" class="contrast-primary-text" small color="primary">
-                    <v-icon small>mdi-minus-circle-outline</v-icon>작가 승인
+            <div class="gs-bundle-of-buttons" style="max-height:20vh; margin-bottom: 24px;">
+                <v-btn :disabled="!selectedRow" style="margin-left: 5px;" @click="approveAuthorDialog = true" class="contrast-primary-text" small color="primary">
+                    <v-icon small class="mr-2">mdi-check-circle-outline</v-icon>작가 승인
                 </v-btn>
                 <v-dialog v-model="approveAuthorDialog" width="500">
                     <ApproveAuthor
+                        :authorName="selectedRow?.authorName"
                         @closeDialog="approveAuthorDialog = false"
                         @approveAuthor="approveAuthor"
-                    ></ApproveAuthor>
+                    />
                 </v-dialog>
-                <v-btn :disabled="!selectedRow || !hasRole('Admin')" style="margin-left: 5px;" @click="disapproveAuthorDialog = true" class="contrast-primary-text" small color="primary">
-                    <v-icon small>mdi-minus-circle-outline</v-icon>작가 비승인
+                <v-btn :disabled="!selectedRow" style="margin-left: 5px;" @click="disapproveAuthorDialog = true" class="contrast-primary-text" small color="primary">
+                    <v-icon small class="mr-2">mdi-close-circle-outline</v-icon>작가 비승인
                 </v-btn>
                 <v-dialog v-model="disapproveAuthorDialog" width="500">
                     <DisapproveAuthor
+                        :authorName="selectedRow?.authorName"
                         @closeDialog="disapproveAuthorDialog = false"
                         @disapproveAuthor="disapproveAuthor"
-                    ></DisapproveAuthor>
+                    />
                 </v-dialog>
             </div>
-            <div class="mb-5 text-lg font-bold"></div>
             <div class="table-responsive">
                 <v-table>
                     <thead>
@@ -47,7 +38,7 @@
                     <tbody>
                         <tr v-for="(val, idx) in value" 
                             @click="changeSelectedRow(val)"
-                            :key="val"  
+                            :key="val._links?.self?.href || idx"  
                             :style="val === selectedRow ? 'background-color: rgb(var(--v-theme-primary), 0.2) !important;':''"
                         >
                             <td class="font-semibold">{{ idx + 1 }}</td>
@@ -58,7 +49,7 @@
                             <td class="whitespace-nowrap" label="승인 여부">{{ val.isApprove ? '승인' : '미승인' }}</td>
                             <v-row class="ma-0 pa-4 align-center">
                                 <v-spacer></v-spacer>
-                                <Icon style="cursor: pointer;" icon="mi:delete" @click="deleteRow(val)" />
+                                <Icon style="cursor: pointer;" icon="mi:delete" @click.stop="deleteRow(val)" />
                             </v-row>
                         </tr>
                     </tbody>
@@ -69,57 +60,82 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import { useTheme } from 'vuetify';
-import BaseGrid from '../base-ui/BaseGrid.vue'
-
+import { ref, onMounted } from 'vue';
+import axios from '@/plugins/axios';
+import BaseRepository from '@/components/repository/BaseRepository.js';
+import ApproveAuthor from '../ApproveAuthor.vue';
+import DisapproveAuthor from '../DisapproveAuthor.vue';
 
 export default {
-    name: 'authorGrid',
-    mixins:[BaseGrid],
-    components:{
+    name: 'AuthorManagement',
+    components: {
+        ApproveAuthor,
+        DisapproveAuthor,
     },
-    data: () => ({
-        path: 'authors',
-        approveAuthorDialog: false,
-        disapproveAuthorDialog: false,
-    }),
-    watch: {
+    data() {
+        return {
+            path: 'authors',
+            repository: null,
+            value: [],
+            selectedRow: null,
+            approveAuthorDialog: false,
+            disapproveAuthorDialog: false,
+        };
     },
-    methods:{
-        async approveAuthor(params){
-            try{
-                var path = "approveAuthor".toLowerCase();
-                var temp = await this.repository.invoke(this.selectedRow, path, params)
-                // 스넥바 관련 수정 필요
-                // this.$EventBus.$emit('show-success','approve author 성공적으로 처리되었습니다.')
-                for(var i = 0; i< this.value.length; i++){
-                    if(this.value[i] == this.selectedRow){
-                        this.value[i] = temp.data
-                    }
-                }
-                this.approveAuthorDialog = false
-            }catch(e){
-                console.log(e)
+    async created() {
+        this.repository = new BaseRepository(axios, this.path);
+        await this.fetchAuthors();
+    },
+    methods: {
+        async fetchAuthors() {
+            try {
+                this.value = await this.repository.find();
+            } catch (e) {
+                // 에러 처리 필요시 여기에 추가
             }
         },
-        async disapproveAuthor(params){
-            try{
-                var path = "disapproveAuthor".toLowerCase();
-                var temp = await this.repository.invoke(this.selectedRow, path, params)
-                // 스넥바 관련 수정 필요
-                // this.$EventBus.$emit('show-success','disapprove author 성공적으로 처리되었습니다.')
-                for(var i = 0; i< this.value.length; i++){
-                    if(this.value[i] == this.selectedRow){
-                        this.value[i] = temp.data
-                    }
-                }
-                this.disapproveAuthorDialog = false
-            }catch(e){
-                console.log(e)
+        changeSelectedRow(val) {
+            this.selectedRow = val;
+        },
+        async approveAuthor(params) {
+            if (!this.selectedRow) return;
+            try {
+                const path = 'approveAuthor';
+                const temp = await this.repository.invoke(this.selectedRow, path, params);
+                this.updateRow(temp.data);
+                this.approveAuthorDialog = false;
+            } catch (e) {
+                // 에러 처리 필요시 여기에 추가
             }
         },
-    }
-}
-
+        async disapproveAuthor(params) {
+            if (!this.selectedRow) return;
+            try {
+                const path = 'disapproveAuthor';
+                const temp = await this.repository.invoke(this.selectedRow, path, params);
+                this.updateRow(temp.data);
+                this.disapproveAuthorDialog = false;
+            } catch (e) {
+                // 에러 처리 필요시 여기에 추가
+            }
+        },
+        async deleteRow(row) {
+            if (!row) return;
+            try {
+                await this.repository.delete(row);
+                this.value = this.value.filter(v => v !== row);
+                this.selectedRow = null;
+                // 성공 처리 필요시 여기에 추가
+            } catch (e) {
+                // 에러 처리 필요시 여기에 추가
+            }
+        },
+        updateRow(newData) {
+            const idx = this.value.findIndex(v => v._links?.self?.href === newData._links?.self?.href);
+            if (idx !== -1) {
+                this.value[idx] = newData;
+            }
+        },
+    },
+};
 </script>
