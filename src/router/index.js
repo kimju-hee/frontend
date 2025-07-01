@@ -43,6 +43,10 @@ const router = createRouter({
       path: '/login',
       component: () => import('../components/pages/Login.vue'),
     },
+    {
+      path: '/author-home',
+      component: () => import('../components/pages/AuthorHome.vue'),
+    },
   ],
 })
 
