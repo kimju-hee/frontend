@@ -1,3 +1,7 @@
-import axios from 'axios'
+import axios from 'axios';
 
-export default axios;
+const instance = axios.create({
+    baseURL: 'http://localhost:8088',
+    withCredentials: true
+})
+export default instance;
