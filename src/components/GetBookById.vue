@@ -1,8 +1,5 @@
 <template>
     <v-card outlined style="border-radius: 0; margin-top: 10px; padding-bottom: 10px; background-color: #F4F5FA;">
-        <v-card-title>
-            도서 조회
-        </v-card-title>
     
         <v-card-text style="margin-top:-10px;">
             <v-row no-gutters style="margin: 15px 0px -10px -15px;">

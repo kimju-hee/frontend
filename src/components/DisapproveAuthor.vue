@@ -1,38 +1,39 @@
 <template>
-
-    <v-card outlined>
-        <v-card-title>
-            DisapproveAuthor
+    <v-card>
+        <v-card-title class="text-h6 font-weight-bold">
+            작가 비승인
         </v-card-title>
 
         <v-card-text>
-            <Boolean label="IsApprove" v-model="value.isApprove" :editMode="editMode"/>
+            <v-alert
+                type="warning"
+                variant="tonal"
+                class="mb-4"
+            >
+                해당 작가를 비승인 처리하시겠습니까?
+            </v-alert>
+            <Boolean label="승인 여부" v-model="value.isApprove" :editMode="editMode"/>
         </v-card-text>
 
         <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
-                    color="deep-purple lighten-2"
-                    text
-                    @click="disapproveAuthor"
+                color="error"
+                @click="disapproveAuthor"
             >
-                DisapproveAuthor
+                비승인
             </v-btn>
-            
             <v-btn
-                    color="deep-purple lighten-2"
-                    text
-                    @click="close"
+                variant="outlined"
+                @click="close"
             >
-                Close
+                취소
             </v-btn>
         </v-card-actions>
     </v-card>
-
 </template>
 
 <script>
-
 export default {
     name: 'DisapproveAuthorCommand',
     components:{
@@ -60,4 +61,3 @@ export default {
     }
 }
 </script>
-

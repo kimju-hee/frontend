@@ -1,38 +1,39 @@
 <template>
-
-    <v-card outlined>
-        <v-card-title>
-            BuySubscription
+    <v-card>
+        <v-card-title class="text-h6 font-weight-bold">
+            구독권 구매
         </v-card-title>
 
         <v-card-text>
-            <Boolean label="IsPurchase" v-model="value.isPurchase" :editMode="editMode"/>
+            <v-alert
+                type="info"
+                variant="tonal"
+                class="mb-4"
+            >
+                월정액 구독을 통해 모든 도서를 무제한으로 이용할 수 있습니다.
+            </v-alert>
         </v-card-text>
 
         <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
-                    color="deep-purple lighten-2"
-                    text
-                    @click="buySubscription"
+                color="primary"
+                @click="buySubscription"
             >
-                BuySubscription
+                구독 신청
             </v-btn>
             
             <v-btn
-                    color="deep-purple lighten-2"
-                    text
-                    @click="close"
+                variant="outlined"
+                @click="close"
             >
-                Close
+                취소
             </v-btn>
         </v-card-actions>
     </v-card>
-
 </template>
 
 <script>
-
 export default {
     name: 'BuySubscriptionCommand',
     components:{
@@ -49,6 +50,7 @@ export default {
     },
     methods: {
         buySubscription() {
+            this.value.isPurchase = true;
             this.$emit('buySubscription', this.value);
         },
         close() {
@@ -60,4 +62,3 @@ export default {
     }
 }
 </script>
-
