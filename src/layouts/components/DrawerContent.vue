@@ -29,7 +29,7 @@ import {
     <VerticalNavLink
       :item="{
         title: 'AI 처리 결과',
-        to: '/processedResults',
+        to: '/ai-result',
       }"
     />
   </ul>

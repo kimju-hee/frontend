@@ -69,6 +69,10 @@ const router = createRouter({
       component: () => import('../components/pages/BookManagement.vue'),
     },
     {
+      path: '/ai-result',
+      component: () => import('../components/pages/AIResult.vue'),
+    },
+    {
       path: '/book-list',
       component: () => import('../components/pages/BookList.vue'),
     },

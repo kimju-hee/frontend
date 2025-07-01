@@ -11,6 +11,7 @@ declare module '@vue/runtime-core' {
     AdminHome: typeof import('./src/components/pages/AdminHome.vue')['default']
     AiBookGeneration: typeof import('./src/components/AiBookGeneration.vue')['default']
     AiBookGenerationGrid: typeof import('./src/components/ui/AiBookGenerationGrid.vue')['default']
+    AIResult: typeof import('./src/components/pages/AIResult.vue')['default']
     ApproveAuthor: typeof import('./src/components/ApproveAuthor.vue')['default']
     Author: typeof import('./src/components/Author.vue')['default']
     AuthorGrid: typeof import('./src/components/ui/AuthorGrid.vue')['default']
