@@ -4,7 +4,6 @@ import { VerticalNavLayout } from '@layouts'
 // Components
 import DrawerContent from '@/layouts/components/DrawerContent.vue'
 import Footer from '@/layouts/components/Footer.vue'
-import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 </script>
 
@@ -22,8 +21,6 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
         </IconBtn>
 
         <VSpacer />
-
-        <NavbarThemeSwitcher class="me-2" />
 
         <UserProfile />
       </div>
