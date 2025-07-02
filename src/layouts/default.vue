@@ -7,7 +7,7 @@ import DefaultLayoutWithoutSidebar from './components/DefaultLayoutWithoutSideba
 const route = useRoute()
 
 const noNavigationPaths = ['/login']
-const noSidebarPaths = ['/author-home', '/reader-home']
+const noSidebarPaths = ['/author-home', '/reader-home', '/book-list']
 
 const shouldHideNavigation = computed(() => noNavigationPaths.includes(route.path))
 const shouldHideSidebar = computed(() => noSidebarPaths.includes(route.path))
