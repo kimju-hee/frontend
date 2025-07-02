@@ -50,7 +50,7 @@
         <v-card elevation="2">
           <v-card-title class="d-flex justify-space-between align-center">
             <span>대여한 도서 목록</span>
-            <v-btn color="primary" variant="outlined" @click="goToBookList">
+            <v-btn color="primary" variant="outlined" @click="$router.push('/book-list')">
               <v-icon left class="mr-2">mdi-book-open-variant</v-icon>
               전체 도서 목록 보기
             </v-btn>
@@ -61,12 +61,13 @@
               :items="rentedBooks"
               :loading="loading"
               class="elevation-0"
+              @click:row="item => $router.push(`/book/${item.id}`)"
             >
+              <template #item.coverImage="{ item }">
+                <v-img :src="item.coverImage || '/placeholder-book.jpg'" max-width="40" max-height="60" aspect-ratio="1" />
+              </template>
               <template v-slot:item.actions="{ item }">
-                <v-btn icon small color="primary" @click="viewBook(item)" class="mr-2">
-                  <v-icon>mdi-eye</v-icon>
-                </v-btn>
-                <v-btn icon small color="error" @click="deleteBook(item)">
+                <v-btn icon small color="error" @click.stop="deleteBook(item)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </template>
@@ -163,9 +164,9 @@
 
 <script>
 import axios from '@/plugins/axios';
-import BuySubscription from '../BuySubscription.vue'
-import CancelSubscription from '../CancelSubscription.vue'
-import { VDataTable } from 'vuetify/labs/VDataTable'
+import { VDataTable } from 'vuetify/labs/VDataTable';
+import BuySubscription from '../BuySubscription.vue';
+import CancelSubscription from '../CancelSubscription.vue';
 
 export default {
   name: 'ReaderHome',
@@ -189,166 +190,165 @@ export default {
       bookDetailDialog: false,
       selectedBook: null,
       headers: [
+        { title: '표지', key: 'coverImage' },
         { title: '제목', key: 'title', sortable: true },
         { title: '저자', key: 'author' },
         { title: '대여일', key: 'rentedAt' },
+        { title: '대여만료일', key: 'endAt' },
         { title: '작업', key: 'actions' }
       ]
     }
   },
   async created() {
-    await this.fetchUserInfo()
-    await this.fetchPoint()
-    await this.fetchSubscription()
-    await this.fetchRentedBooks()
+    this.userRepository = new BaseRepository(axios, 'users');
+    this.subscriptionRepository = new BaseRepository(axios, 'subscriptions');
+    await this.fetchUser();
+    await this.fetchPoint();
+    await this.fetchRentedBooks();
   },
   methods: {
-    async fetchUserInfo() {
+    async fetchUser() {
       try {
-        const userResponse = await axios.get(`/users/${this.userId}`); // userId는 localStorage에서 가져옴
-        this.userName = userResponse.data.userName;
-        // 필요하다면 email 등 다른 사용자 정보도 저장
+        const user = await this.userRepository.findById(this.userId);
+        if (user) {
+          this.userName = user.userName;
+          this.isPurchase = user.isPurchase;
+        }
       } catch (e) {
         console.error('사용자 정보 조회 실패', e);
-        // 에러 처리 (스낵바 등)
+        this.isPurchase = false;
       }
     },
     async fetchPoint() {
       try {
-        const pointResponse = await axios.get(`/points/userId/${String(this.userId)}`); // userId를 String으로 변환
+        const pointResponse = await axios.get(`/points/userId/${String(this.userId)}`);
         this.point = pointResponse.data.point;
       } catch (e) {
         console.error('포인트 조회 실패', e);
-        this.point = 0; // 에러 발생 시 0으로 초기화
-        // 에러 처리 (스낵바 등)
-      }
-    },
-    async fetchSubscription() {
-      try {
-        const userResponse = await axios.get(`/users/${this.userId}`);
-        this.isPurchase = userResponse.data.isPurchase;
-      } catch (e) {
-        console.error('구독 여부 조회 실패', e);
-        this.isPurchase = false; // 에러 발생 시 미구독으로 설정
-        // 에러 처리 (스낵바 등)
+        this.point = 0;
       }
     },
     async fetchRentedBooks() {
       this.loading = true;
       try {
-        // userId와 isSubscription=true 조건으로 구독 목록 조회
-        const subResponse = await axios.get(`/subscriptions/search/getSubscription?userId=${String(this.userId)}&isSubscription=true`);
-        
-        const activeSubscription = subResponse.data;
-
-        if (activeSubscription) {
-          // Subscription 객체에서 bookId와 id(Subscription ID) 추출
-          const bookId = activeSubscription.bookId?.value; // BookId는 Embeddable이고 value 필드를 가짐
-          const subscriptionId = activeSubscription.id; // Subscription 엔티티의 ID
-
-          this.rentedBooks = [{
-            id: bookId, // 책의 ID
-            subscriptionId: subscriptionId, // 구독의 ID (해지에 사용)
-            title: bookData.bookName,
-            author: bookData.authorName,
-            rentedAt: new Date(activeSubscription.startSubscription).toLocaleDateString(), // 구독 시작일이 대여일
-            coverImage: bookData.coverImageUrl // Book 엔티티에 coverImageUrl 있다면
-          }];
-        } else {
-          this.rentedBooks = [];
-        }
+        const allSubscriptionsResponse = await axios.get(
+          '/subscriptions',
+          {
+            params: {
+              'userId.value': String(this.userId),
+              'isSubscription': true
+            }
+          }
+        );
+        const subscriptions = allSubscriptionsResponse.data._embedded?.subscriptions || [];
+        const rentedBookPromises = subscriptions.map(async (sub) => {
+          const bookId = sub.bookId?.value;
+          if (bookId) {
+            try {
+              const bookDataResponse = await axios.get(`/books/${bookId}`);
+              const bookData = bookDataResponse.data;
+              return {
+                id: bookId,
+                subscriptionId: sub.id,
+                title: bookData.bookName,
+                author: bookData.authorName,
+                rentedAt: new Date(sub.startSubscription).toLocaleDateString(),
+                endAt: new Date(sub.endSubscription).toLocaleDateString(),
+                coverImage: bookData.coverImageUrl // TODO: Book 엔티티에 이 필드가 있는지 백엔드와 확인 필요
+              };
+            } catch (bookError) {
+              console.warn(`Failed to fetch book data for ID ${bookId}:`, bookError);
+              return null;
+            }
+          }
+          return null;
+        });
+        this.rentedBooks = (await Promise.all(rentedBookPromises)).filter(Boolean);
       } catch (e) {
         console.error('대여 도서 목록 조회 실패', e);
+        this.rentedBooks = [];
       } finally {
         this.loading = false;
       }
     },
     async chargePoint() {
       try {
-        // chargeAmount가 숫자이고 0보다 큰지 확인
         if (this.chargeAmount <= 0) {
           alert('충전 금액은 0보다 커야 합니다.');
           return;
         }
         await axios.post('/points/charge', {
-          userId: String(this.userId), // userId를 String으로 변환
-          amount: this.chargeAmount, // amount 필드 사용
+          userId: String(this.userId),
+          amount: this.chargeAmount,
         });
         this.chargePointDialog = false;
-        await this.fetchPoint(); // 포인트 잔액 갱신
+        await this.fetchPoint();
         alert('포인트 충전 요청이 완료되었습니다.');
       } catch (e) {
         console.error('포인트 충전 실패', e);
         alert('포인트 충전에 실패했습니다.');
       }
     },
-    async buySubscription(val) { // val은 BuySubscription 컴포넌트에서 emit된 값
+    async buySubscription(val) {
       try {
         await axios.put(`/users/${this.userId}/buysubscription`, {
-          isPurchase: val.isPurchase // BuySubscription 컴포넌트에서 이 값을 emit할 경우
+          isPurchase: val.isPurchase
         });
         this.buySubscriptionDialog = false;
-        await this.fetchSubscription(); // 구독 상태 갱신
+        await this.fetchUser();
       } catch (e) {
         console.error('구독 신청 실패', e);
       }
     },
-    async cancelSubscription(val) {
-      try {
-        // 현재 사용자의 활성 월정액 구독을 다시 조회
-        const subResponse = await axios.get(`/subscriptions/search/getSubscription?userId=${String(this.userId)}&isSubscription=true`);
-        const activeSubscription = subResponse.data;
+    // methods 내 cancelSubscription() 함수
+    async cancelSubscription() {
+        try {
+            // TODO: 백엔드와 월정액 구독 해지 API 논의 후 구현
+            // 1. User의 isPurchase를 false로 변경하는 API 호출 필요.
+            //    예시: await axios.put(`/users/${this.userId}/cancelMonthlySubscription`);
+            //    혹은, buySubscription처럼 isPurchase: false를 보내는 API를 백엔드에서 지원한다면:
+            //    await axios.put(`/users/${this.userId}/buysubscription`, { isPurchase: false });
 
-        if (!activeSubscription || !activeSubscription.id) {
-          this.showSnackbar('해지할 활성 구독 정보를 찾을 수 없습니다.', 'warning');
-          this.cancelSubscriptionDialog = false;
-          return;
+            // 현재는 임시로 사용자 isPurchase 상태만 변경하고 알림
+            // 백엔드 API가 구현될 때까지 이 부분은 동작하지 않거나 불완전합니다.
+            this.isPurchase = false; // 프론트엔드 상태만 임시 변경
+            this.cancelSubscriptionDialog = false;
+            alert('월정액 구독 해지 요청을 보냈습니다. (백엔드 구현 예정)'); // 임시 알림
+
+            await this.fetchUser(); // User 상태 갱신 (백엔드 API 호출 후)
+            // await this.fetchRentedBooks(); // 필요시 대여 목록 갱신 (월정액 해지와 대여 목록은 직접적 연관은 적음)
+
+        } catch (e) {
+            console.error('월정액 구독 해지 실패', e);
+            // this.showSnackbar('월정액 구독 해지에 실패했습니다.', 'error');
+            alert('월정액 구독 해지에 실패했습니다.');
         }
-
-        // PUT /subscriptions/{id}/cancelsubscription API 호출
-        // CancelSubscriptionCommand는 빈 객체입니다.
-        await axios.put(`/subscriptions/${activeSubscription.id}/cancelsubscription`, {});
-        
-        this.cancelSubscriptionDialog = false;
-        await this.fetchSubscription(); // 구독 상태 갱신
-        await this.fetchRentedBooks(); // 대여 목록 갱신 (구독 해지 시 목록에서 사라져야 하므로)
-        this.showSnackbar('구독 해지가 완료되었습니다.', 'success');
-      } catch (e) {
-        console.error('구독 해지 실패', e);
-        this.showSnackbar('구독 해지에 실패했습니다.', 'error');
-      }
-    },
-    viewBook(item) {
-      this.selectedBook = item
-      this.bookDetailDialog = true
     },
     async deleteBook(item) {
       try {
         const confirmed = confirm(`'${item.title}' 도서를 대여 목록에서 삭제하시겠습니까?`);
         if (!confirmed) return;
-
-        // 대여 도서 삭제는 해당 `Subscription`을 취소하는 것으로 처리
-        // item.subscriptionId는 fetchRentedBooks에서 함께 가져와야 합니다.
         if (!item.subscriptionId) {
           this.showSnackbar('삭제할 도서의 구독 정보를 찾을 수 없습니다.', 'warning');
           return;
         }
-
-        // PUT /subscriptions/{id}/cancelsubscription API 호출
-        await axios.put(`/subscriptions/${item.subscriptionId}/cancelsubscription`, {});
-
-        // API 호출 성공 후 프론트엔드 목록에서 제거
+        const subscriptionEntity = await this.subscriptionRepository.findById(item.subscriptionId);
+        if (subscriptionEntity && subscriptionEntity._links?.cancelsubscription) {
+          await this.subscriptionRepository.invoke(subscriptionEntity, 'cancelsubscription', {});
+        } else {
+          throw new Error("Cancel subscription link not found for book's subscription.");
+        }
         const index = this.rentedBooks.findIndex(book => book.id === item.id);
         if (index !== -1) {
           this.rentedBooks.splice(index, 1);
         }
-        await this.fetchSubscription(); // 구독 여부도 다시 확인 (필요시)
+        await this.fetchUser();
       } catch (e) {
         console.error(e);
       }
     },
-    goToBookList() {
-      this.$router.push('/book-list')
+    showSnackbar(msg, color = 'info') {
+      // 필요시 스낵바 구현
     }
   }
 }
