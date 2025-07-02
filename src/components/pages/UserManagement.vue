@@ -13,41 +13,25 @@
         <div class="panel">
             <div class="mb-5 text-lg font-bold"></div>
             <div class="table-responsive">
-                <v-data-table
+                <VDataTable
                     :headers="headers"
                     :items="usersWithPoints"
                     item-key="id"
                     :items-per-page="10"
                     class="elevation-1"
                     @click:row="changeSelectedRow"
-                    hide-default-footer
                 >
-                    <template #item.userName="{ item }">
-                        <span :class="{ 'font-semibold': item === selectedRow }">{{ item.userName }}</span>
-                    </template>
-                    <template #item.point="{ item }">
-                        <span :class="{ 'font-semibold': item === selectedRow }">{{ item.point || 0 }}</span>
-                    </template>
-                    <template #item.isPurchase="{ item }">
-                        <span :class="{ 'font-semibold': item === selectedRow }">{{ item.isPurchase }}</span>
-                    </template>
-                    <template #item.email="{ item }">
-                        <span :class="{ 'font-semibold': item === selectedRow }">{{ item.email }}</span>
-                    </template>
-                    <template #item.message="{ item }">
-                        <span :class="{ 'font-semibold': item === selectedRow }">{{ item.mseeage }}</span> </template>
-                    <template #item="{ item, index, internalHeaders }">
+                    <template #item="{ item, index }">
                         <tr :class="{ 'selected-row-class': item === selectedRow }" @click="changeSelectedRow(item)">
-                            <td class="font-semibold">{{ index + 1 }}</td> <template v-for="header in internalHeaders.filter(h => h.key !== 'id')" :key="header.key">
-                                <td class="whitespace-nowrap">
-                                    {{ item[header.key] }}
-                                </td>
-                            </template>
+                            <td class="font-semibold">{{ index + 1 }}</td>
+                            <td class="whitespace-nowrap">{{ item.userName }}</td>
+                            <td class="whitespace-nowrap">{{ item.point || 0 }}</td>
+                            <td class="whitespace-nowrap">{{ item.isPurchase }}</td>
+                            <td class="whitespace-nowrap">{{ item.email }}</td>
+                            <td class="whitespace-nowrap">{{ item.message }}</td>
                         </tr>
                     </template>
-
-
-                </v-data-table>
+                </VDataTable>
             </div>
         </div>
     </v-container>
@@ -76,12 +60,12 @@ export default {
                 color: 'info',
             },
             headers: [
-                { title: 'No.', key: 'id', sortable: false }, // 인덱스를 위한 더미 헤더 또는 No. (수동 렌더링 시)
+                { title: 'No.', key: 'id', sortable: false },
                 { title: '독자명', key: 'userName' },
                 { title: '보유 포인트', key: 'point' },
                 { title: '월정액 구독 여부', key: 'isPurchase' },
                 { title: 'Email', key: 'email' },
-                { title: '알림 메시지', key: 'mseeage' }, // TODO: 백엔드 오타 수정 필요
+                { title: '알림 메시지', key: 'message' },
             ],
         };
     },
