@@ -85,8 +85,8 @@
             <v-text-field v-model="signupForm.email" label="아이디(이메일)" outlined dense class="mb-4" required />
             <v-text-field v-model="signupForm.password" label="비밀번호" type="password" outlined dense class="mb-4" required />
             <v-text-field v-model="signupForm.name" label="이름" outlined dense class="mb-4" required />
-            <v-textarea v-model="signupForm.introduction" label="소개말" outlined rows="3" class="mb-4" required />
-            <v-text-field v-model="signupForm.works" label="대표작(쉼표로 구분)" outlined dense class="mb-6" required />
+            <v-textarea v-model="signupForm.introduction" label="소개말" outlined rows="3" class="mb-4" />
+            <v-text-field v-model="signupForm.works" label="대표작(쉼표로 구분)" outlined dense class="mb-6" />
           </div>
         </v-card-text>
         <v-card-actions>
@@ -136,27 +136,29 @@ export default {
       // 관리자 로그인
       if (this.userID === 'admin' && this.userPW === 'admin') {
         localStorage.setItem('userType', 'admin');
+        localStorage.setItem('userId', 999);
         this.$router.push('/admin-home');
         alert('관리자로 로그인되었습니다!');
         return;
       }
       // 독자/작가 로그인
       try {
-        const userRes = await axios.get('/users/search/findByEmail', {
+        const readerRes = await axios.get('/users/search/findByEmail', {
           params: {
             email: this.userID,
           }
         });
 
-        if (userRes.data && userRes.data.id) {
+        if (readerRes.data && readerRes.data.id) {
           localStorage.setItem('userType', 'reader');
+          localStorage.setItem('userId', readerRes.data.id);
           this.$router.push('/reader-home');
           return;
         }
       } catch (e) {}
 
       try {
-        const authorRes = await axios.get('/authors/search/findByEmail', { // TODO
+        const authorRes = await axios.get('/authors/search/findByEmail', { // TODO: 백엔드 API 구현 필요
           params: {
             email: this.userID,
           }
@@ -164,6 +166,7 @@ export default {
 
         if (authorRes.data && authorRes.data.id) {
           localStorage.setItem('userType', 'author');
+          localStorage.setItem('userId', authorRes.data.id);
           this.$router.push('/author-home');
           return;
         }
