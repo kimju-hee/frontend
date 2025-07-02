@@ -6,9 +6,9 @@
           <v-card-title class="text-h5 font-weight-bold text-center mb-6">
             로그인
           </v-card-title>
-          <v-form @submit.prevent="onLogin">
+          <v-form @submit.prevent="login">
             <v-text-field
-              v-model="userID"
+              v-model="email"
               label="아이디(이메일)"
               prepend-inner-icon="mdi-account"
               outlined
@@ -17,7 +17,7 @@
               required
             />
             <v-text-field
-              v-model="userPW"
+              v-model="password"
               label="비밀번호"
               type="password"
               prepend-inner-icon="mdi-lock"
@@ -33,7 +33,7 @@
                   large
                   block
                   class="mb-4"
-                  @click="onLogin"
+                  @click="login"
                 >
                   로그인
                 </v-btn>
@@ -86,7 +86,7 @@
             <v-text-field v-model="signupForm.password" label="비밀번호" type="password" outlined dense class="mb-4" required />
             <v-text-field v-model="signupForm.name" label="이름" outlined dense class="mb-4" required />
             <v-textarea v-model="signupForm.introduction" label="소개말" outlined rows="3" class="mb-4" />
-            <v-text-field v-model="signupForm.works" label="대표작(쉼표로 구분)" outlined dense class="mb-6" />
+            <v-text-field v-model="signupForm.featuredWorks" label="대표작(쉼표로 구분)" outlined dense class="mb-6" />
           </div>
         </v-card-text>
         <v-card-actions>
@@ -115,11 +115,13 @@
 import axios from '@/plugins/axios';
 
 export default {
-  name: 'login',
+  name: 'Login',
   data() {
     return {
-      userID: '',
-      userPW: '',
+      email: '',
+      password: '',
+      loginError: false,
+
       showSignupDialog: false,
       signupRole: 'reader',
       signupForm: {
@@ -127,91 +129,103 @@ export default {
         password: '',
         name: '',
         introduction: '',
-        works: ''
-      }
+        featuredWorks: ''
+      },
+      signupError: false,
     }
   },
   methods: {
     async login() {
-      // 관리자 로그인
-      if (this.userID === 'admin' && this.userPW === 'admin') {
+      this.loginError = false;
+
+      // 관리자 로그인 시도
+      if (this.email === 'admin' && this.password === 'admin') {
         localStorage.setItem('userType', 'admin');
-        localStorage.setItem('userId', 999);
+        localStorage.setItem('userId', 9999);
+        alert('관리자 로그인 성공!');
         this.$router.push('/admin-home');
-        alert('관리자로 로그인되었습니다!');
         return;
       }
-      // 독자/작가 로그인
-      try {
-        const readerRes = await axios.get('/users/search/findByEmail', {
-          params: {
-            email: this.userID,
-          }
-        });
 
-        if (readerRes.data && readerRes.data.id) {
+      // 독자 로그인 시도
+      try {
+        const userResponse = await axios.get(`/users/search/findByEmail?email=${this.email}`);
+        if (userResponse.data._embedded.users.length > 0) {
           localStorage.setItem('userType', 'reader');
-          localStorage.setItem('userId', readerRes.data.id);
+          localStorage.setItem('userId', userResponse.data._embedded.users[0].id);
+          alert('독자 로그인 성공!');
           this.$router.push('/reader-home');
           return;
         }
-      } catch (e) {}
+      } catch (userError) {
+        console.warn('독자 로그인 실패 또는 이메일 없음:', userError);
+      }
 
+      // 작가 로그인 시도
       try {
-        const authorRes = await axios.get('/authors/search/findByEmail', { // TODO: 백엔드 API 구현 필요
-          params: {
-            email: this.userID,
-          }
-        });
-
-        if (authorRes.data && authorRes.data.id) {
+        const authorResponse = await axios.get(`/authors/search/findByEmail?email=${this.email}`);
+        // TODO: UserRepository.java에 Optional<User> findByEmail(String email); 추가 필요
+        if (authorResponse.data._embedded.authors.length > 0) {
           localStorage.setItem('userType', 'author');
-          localStorage.setItem('userId', authorRes.data.id);
+          localStorage.setItem('userId', authorResponse.data._embedded.authors[0].id);
+          alert('작가 로그인 성공!');
           this.$router.push('/author-home');
           return;
         }
-      } catch (e) {}
+      } catch (authorError) {
+        console.warn('작가 로그인 실패 또는 이메일 없음:', authorError);
+      }
 
-      alert('로그인 실패: 아이디 또는 비밀번호를 확인하세요.');
-    },
-
-    async onLogin() {
-      await this.login();
+      // 모든 로그인 시도 실패
+      this.loginError = true;
+      alert('로그인 실패: 아이디 또는 비밀번호를 확인해주세요.');
     },
 
     closeSignupDialog() {
       this.showSignupDialog = false;
-      this.signupForm = { email: '', password: '', name: '', introduction: '', works: '' };
+      this.signupForm = { email: '', password: '', name: '', introduction: '', featuredWorks: '' };
       this.signupRole = 'reader';
     },
 
     async signup() {
-      try {
-        const path = this.signupRole === 'reader' ? '/users' : '/authors';
+      this.signupError = false;
 
-        const payload = {
-          email: this.signupForm.email,
-        };
-
-        if (this.signupRole === 'reader') {
-          payload.userName = this.signupForm.name;
-          payload.isPurchase = false;
-          payload.message = '';
-        } else if (this.signupRole === 'author') {
-          payload.authorName = this.signupForm.name;
-          payload.introduction = this.signupForm.introduction;
-          payload.featuredWorks = this.signupForm.works;
-          payload.portfolios = [];
-          payload.isApprove = false;
+      if (this.signupRole === 'reader') {
+        // 독자 회원가입
+        try {
+          const newReader = {
+            email: this.signupForm.email,
+            userName: this.signupForm.name,
+            isPurchase: false,
+            message: '환영합니다!',
+          };
+          await axios.post('/users', newReader);
+          alert('회원가입이 완료되었습니다! 로그인 후 이용해 주세요.');
+          this.$router.push('/login');
+        } catch (error) {
+          this.signupError = true;
+          console.error('독자 회원가입 에러:', error);
         }
-
-        const response = await axios.post(path, payload);
-
-        alert('회원가입이 완료되었습니다. 로그인 후 이용해 주세요.');
-      } catch (e) {
-        alert('회원가입 실패: 입력 정보를 확인하세요.');
+      } 
+      
+      else if (this.signupRole === 'author') {
+        try {
+          const newAuthor = {
+            email: this.signupForm.email,
+            authorName: this.signupForm.name,
+            isApprove: false,
+            introduction: this.signupForm.introduction,
+            featuredWorks: this.signupForm.featuredWorks,
+          };
+          await axios.post('/authors', newAuthor);
+          alert('회원가입이 완료되었습니다! 로그인 후 이용해 주세요.');
+            this.$router.push('/login');
+        } catch (error) {
+            this.signupError = true;
+            console.error('작가 회원가입 에러:', error);
+        }
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
