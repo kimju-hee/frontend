@@ -1,4 +1,8 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
 const avatarBadgeProps = {
   dot: true,
   location: 'bottom right',
@@ -8,7 +12,21 @@ const avatarBadgeProps = {
   bordered: true,
 }
 
-const userName = "USER"
+const userName = localStorage.getItem('userName') || "USER"
+
+const handleLogout = () => {
+  // localStorage 초기화
+  localStorage.clear()
+  
+  // 또는 특정 키만 삭제하려면:
+  // localStorage.removeItem('userId')
+  // localStorage.removeItem('userName')
+  // localStorage.removeItem('userRole')
+  // localStorage.removeItem('token')
+  
+  // 로그인 페이지로 이동
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -45,14 +63,14 @@ const userName = "USER"
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              
+              {{ userName }}
             </VListItemTitle>
           </VListItem>
 
           <VDivider class="my-2" />
           
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem @click="handleLogout">
             <template #prepend>
               <VIcon
                 class="me-2"
