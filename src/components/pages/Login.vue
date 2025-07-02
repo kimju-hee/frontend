@@ -171,30 +171,36 @@ export default {
 
       // 독자 로그인
       try {
-        const userResponse = await axios.get(`/users/search/findByEmail?email=${this.email}`)
-        if (userResponse.data._embedded.users.length > 0) {
-          localStorage.setItem('userType', 'reader')
-          localStorage.setItem('userId', userResponse.data._embedded.users[0].id)
-          alert('독자 로그인 성공!')
-          this.$router.push('/reader-home')
-          return
+        const users = await this.userRepository.find({
+          apiPath: 'users/search/findByEmail',
+          parameters: { email: this.email }
+        });
+        if (users && users.length > 0) { 
+          localStorage.setItem('userType', 'reader');
+          localStorage.setItem('userId', users[0].id); 
+          alert('독자 로그인 성공!');
+          this.$router.push('/reader-home');
+          return;
         }
       } catch (userError) {
-        console.warn('독자 로그인 실패 또는 이메일 없음:', userError)
+        console.warn('독자 로그인 실패 또는 이메일 없음:', userError);
       }
 
       // 작가 로그인
       try {
-        const authorResponse = await axios.get(`/authors/search/findByEmail?email=${this.email}`)
-        if (authorResponse.data._embedded.authors.length > 0) {
-          localStorage.setItem('userType', 'author')
-          localStorage.setItem('userId', authorResponse.data._embedded.authors[0].id)
-          alert('작가 로그인 성공!')
-          this.$router.push('/author-home')
-          return
+        const authors = await this.authorRepository.find({
+          apiPath: 'authors/search/findByEmail',
+          parameters: { email: this.email }
+        });
+        if (authors && authors.length > 0) { //
+          localStorage.setItem('userType', 'author');
+          localStorage.setItem('userId', authors[0].id); //
+          alert('작가 로그인 성공!');
+          this.$router.push('/author-home');
+          return;
         }
       } catch (authorError) {
-        console.warn('작가 로그인 실패 또는 이메일 없음:', authorError)
+          console.warn('작가 로그인 실패 또는 이메일 없음:', authorError);
       }
 
       // 로그인 실패
@@ -225,7 +231,7 @@ export default {
             email: this.signupForm.email,
             userName: this.signupForm.name,
             isPurchase: false,
-            message: '환영합니다!'
+            message: '환영합니다!' // TODO: User.java 오타 수정 필요
           }
           await axios.post('/users', newReader)
           alert('회원가입이 완료되었습니다! 로그인 후 이용해 주세요.')
