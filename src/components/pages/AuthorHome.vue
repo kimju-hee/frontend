@@ -1,15 +1,16 @@
 <template>
-  <v-container fluid class="pa-8">
+  <v-container
+    fluid
+    class="pa-8"
+  >
     <v-row class="mb-6">
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold mb-2">
-              {{ authorInfo.authorName }} 작가님, 환영합니다!
-            </h1>
+            <h1 class="text-h4 font-weight-bold mb-2">{{ authorInfo.authorName }} 작가님, 환영합니다!</h1>
             <div class="d-flex align-center">
-              <v-icon 
-                :icon="authorInfo.isApprove ? 'mdi-check-circle' : 'mdi-clock-outline'" 
+              <v-icon
+                :icon="authorInfo.isApprove ? 'mdi-check-circle' : 'mdi-clock-outline'"
                 :color="authorInfo.isApprove ? 'success' : 'warning'"
                 class="mr-2"
               />
@@ -18,7 +19,12 @@
               </span>
             </div>
           </div>
-          <v-btn color="primary" size="large" @click="showManuscriptDialog = true" :disabled="!authorInfo.isApprove">
+          <v-btn
+            color="primary"
+            size="large"
+            @click="showManuscriptDialog = true"
+            :disabled="!authorInfo.isApprove"
+          >
             <v-icon left>mdi-plus</v-icon>
             새 원고 작성
           </v-btn>
@@ -29,62 +35,92 @@
     <!-- 작가 정보 -->
     <v-row class="mb-8">
       <v-col cols="12">
-        <v-card elevation="2">
-          <v-card-text>
-            <v-form v-if="editMode" @submit.prevent="saveAuthorInfo">
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="formData.email"
-                    label="이메일"
-                    outlined
-                    dense
-                    readonly
-                  />
-                </v-col>
-                <v-col cols="12">
-                  <v-textarea
-                    v-model="formData.introduction"
-                    label="작가 소개"
-                    outlined
-                    rows="4"
-                  />
-                </v-col>
-                <v-col cols="12">
-                  <v-textarea
-                    v-model="formData.featuredWorks"
-                    label="대표작"
-                    outlined
-                    rows="2"
-                  />
-                </v-col>
-                <v-col cols="12" class="d-flex justify-end">
-                  <v-btn color="success" type="submit" class="mr-2">저장</v-btn>
-                  <v-btn variant="outlined" @click="cancelEditMode">취소</v-btn>
-                </v-col>
-              </v-row>
-            </v-form>
-            <div v-else>
-              <v-row>
-                <v-col cols="12">
-                  <strong>이메일:</strong>
-                  <p class="mt-1">{{ authorInfo.email }}</p>
-                </v-col>
-                <v-col cols="12">
-                  <strong>작가 소개:</strong>
-                  <p class="mt-1">{{ authorInfo.introduction || '작가 소개가 없습니다.' }}</p>
-                </v-col>
-                <v-col cols="12">
-                  <strong>대표작:</strong>
-                  <p class="mt-1">{{ authorInfo.featuredWorks || '대표작이 없습니다.' }}</p>
-                </v-col>
-                <v-col cols="12" class="d-flex justify-end">
-                  <v-btn color="primary" variant="outlined" @click="startEditMode">수정</v-btn>
-                </v-col>
-              </v-row>
-            </div>
-          </v-card-text>
-        </v-card>
+        <div class="position-relative">
+          <v-btn
+            v-if="!editMode"
+            color="secondary"
+            variant="plain"
+            @click="startEditMode"
+            size="small"
+            class="position-absolute"
+            style="top: 8px; right: 8px; z-index: 1"
+          >
+            <v-icon
+              small
+              class="mr-1"
+              >mdi-pencil</v-icon
+            >
+            수정
+          </v-btn>
+          <v-card elevation="2">
+            <v-card-text>
+              <v-form
+                v-if="editMode"
+                @submit.prevent="saveAuthorInfo"
+              >
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      v-model="formData.email"
+                      label="이메일"
+                      outlined
+                      dense
+                      readonly
+                    />
+                  </v-col>
+                  <v-col cols="12">
+                    <v-textarea
+                      v-model="formData.introduction"
+                      label="작가 소개"
+                      outlined
+                      rows="4"
+                    />
+                  </v-col>
+                  <v-col cols="12">
+                    <v-textarea
+                      v-model="formData.featuredWorks"
+                      label="대표작"
+                      outlined
+                      rows="2"
+                    />
+                  </v-col>
+                </v-row>
+              </v-form>
+              <div v-else>
+                <v-row>
+                  <v-col cols="12">
+                    <strong>이메일:</strong>
+                    <p class="mt-1">{{ authorInfo.email }}</p>
+                  </v-col>
+                  <v-col cols="12">
+                    <strong>작가 소개:</strong>
+                    <p class="mt-1">{{ authorInfo.introduction || '작가 소개가 없습니다.' }}</p>
+                  </v-col>
+                  <v-col cols="12">
+                    <strong>대표작:</strong>
+                    <p class="mt-1">{{ authorInfo.featuredWorks || '대표작이 없습니다.' }}</p>
+                  </v-col>
+                </v-row>
+              </div>
+            </v-card-text>
+            <v-card-actions
+              v-if="editMode"
+              class="justify-end"
+            >
+              <v-btn
+                color="success"
+                class="mr-2"
+                @click="saveAuthorInfo"
+                >저장</v-btn
+              >
+              <v-btn
+                color="secondary"
+                @click="cancelEditMode"
+                >취소</v-btn
+              >
+            </v-card-actions>
+          </v-card>
+        </div>
       </v-col>
     </v-row>
 
@@ -92,9 +128,7 @@
     <v-row>
       <v-col cols="12">
         <v-card elevation="2">
-          <v-card-title class="text-h5 font-weight-bold text-left mb-4">
-            원고 목록
-          </v-card-title>
+          <v-card-title class="text-h5 font-weight-bold text-left mb-4"> 원고 목록 </v-card-title>
           <v-card-text>
             <VDataTable
               :headers="headers"
@@ -104,21 +138,27 @@
             >
               <template #item.actions="{ item }">
                 <v-btn
-                  icon small color="warning"
+                  icon
+                  small
+                  color="warning"
                   @click="editManuscript(item)"
                   :disabled="!(item.status === 'WRITING' || item.status === 'EDITED')"
                 >
                   <v-icon>mdi-pencil</v-icon>
                 </v-btn>
                 <v-btn
-                  icon small color="error"
+                  icon
+                  small
+                  color="error"
                   @click="deleteManuscript(item)"
                   :disabled="!(item.status === 'WRITING' || item.status === 'EDITED')"
                 >
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <v-btn
-                  icon small color="teal"
+                  icon
+                  small
+                  color="teal"
                   @click="requestPublish(item)"
                   v-if="item.status === 'EDITED' || item.status === 'REQUESTED' || item.status === 'DONE'"
                   :disabled="item.status !== 'EDITED'"
@@ -139,12 +179,23 @@
     </v-row>
 
     <!-- 새 원고 등록 다이얼로그 -->
-    <v-dialog v-model="showManuscriptDialog" transition="dialog-bottom-transition" max-width="50%">
-      <v-card style="min-height: 600px;">
-        <v-toolbar color="primary" class="elevation-0 pa-4" height="50px">
-          <div style="color:white; font-size:17px; font-weight:700;">새 원고 작성</div>
+    <v-dialog
+      v-model="showManuscriptDialog"
+      transition="dialog-bottom-transition"
+      max-width="50%"
+    >
+      <v-card style="min-height: 600px">
+        <v-toolbar
+          color="primary"
+          class="elevation-0 pa-4"
+          height="50px"
+        >
+          <div style="color: white; font-size: 17px; font-weight: 700">새 원고 작성</div>
           <v-spacer></v-spacer>
-          <v-btn icon @click="showManuscriptDialog = false">
+          <v-btn
+            icon
+            @click="showManuscriptDialog = false"
+          >
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -164,12 +215,20 @@
               rows="16"
               auto-grow
               required
-              style="min-height: 300px;"
+              style="min-height: 300px"
             />
           </v-card-text>
           <v-card-actions class="justify-end">
-            <v-btn text @click="showManuscriptDialog = false">취소</v-btn>
-            <v-btn color="primary" type="submit">저장</v-btn>
+            <v-btn
+              text
+              @click="showManuscriptDialog = false"
+              >취소</v-btn
+            >
+            <v-btn
+              color="primary"
+              type="submit"
+              >저장</v-btn
+            >
           </v-card-actions>
         </v-form>
       </v-card>
@@ -185,7 +244,7 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
 export default {
   name: 'AuthorHome',
   components: {
-    VDataTable
+    VDataTable,
   },
   data() {
     return {
@@ -195,22 +254,22 @@ export default {
         isApprove: false,
         email: '',
         introduction: '',
-        featuredWorks: ''
+        featuredWorks: '',
       },
       formData: {
         authorName: '',
         isApprove: false,
         email: '',
         introduction: '',
-        featuredWorks: ''
+        featuredWorks: '',
       },
       editMode: false,
       manuscripts: [],
       headers: [
         { title: '제목', key: 'title' },
-        { title: '수정일', key: 'updatedAt' },
+        { title: '최종수정일', key: 'updatedAt' },
         { title: '상태', key: 'status' },
-        { title: '액션', key: 'actions', sortable: false }
+        { title: '', key: 'actions', sortable: false },
       ],
       search: '',
       statusFilter: 'ALL',
@@ -220,19 +279,19 @@ export default {
         title: '',
         content: '',
         authorId: null,
-        status: null
+        status: null,
       },
-      manuscriptError: false
+      manuscriptError: false,
     }
   },
   computed: {
-    statusOptions() { // TODO: 백엔드랑 상의해서 status 다시 정의하기
+    statusOptions() {
       return [
         { text: '모든 상태', value: 'ALL' },
         { text: '작성 중', value: 'WRITING' },
         { text: '작성 완료', value: 'EDITED' },
         { text: '출간 준비 중', value: 'REQUESTED' },
-        { text: '출간 완료', value: 'DONE' }
+        { text: '출간 완료', value: 'DONE' },
       ]
     },
     filteredManuscripts() {
@@ -241,14 +300,14 @@ export default {
         tempManuscripts = tempManuscripts.filter(ms => ms.status === this.statusFilter)
       }
       return tempManuscripts
-    }
+    },
   },
   async created() {
     this.authorRepository = new BaseRepository(axios, 'authors')
     this.manuscriptRepository = new BaseRepository(axios, 'manuscripts')
     this.authorId = localStorage.getItem('userId')
     if (!this.authorId || localStorage.getItem('userType') !== 'author') {
-      alert('유효한 작가 정보가 없습니다. 로그인 페이지로 이동합니다.')
+      // alert('유효한 작가 정보가 없습니다. 로그인 페이지로 이동합니다.')
       // this.$router.push('/login')
       return
     }
@@ -271,14 +330,14 @@ export default {
             isApprove: response.isApprove,
             email: response.email,
             introduction: response.introduction,
-            featuredWorks: response.featuredWorks
+            featuredWorks: response.featuredWorks,
           }
         } else {
-          alert('작가 정보를 찾을 수 없습니다.')
+          // alert('작가 정보를 찾을 수 없습니다.')
           // this.$router.push('/login')
         }
       } catch (error) {
-        alert('작가 정보를 불러오는 중 오류가 발생했습니다.')
+        // alert('작가 정보를 불러오는 중 오류가 발생했습니다.')
         console.error('작가 정보 불러오기 실패:', error)
         // this.$router.push('/login')
       }
@@ -289,7 +348,7 @@ export default {
       try {
         const response = await this.manuscriptRepository.find({
           apiPath: 'manuscripts/search/findByAuthorId',
-          parameters: { 'authorId.value': this.authorId }
+          parameters: { 'authorId.value': this.authorId },
         })
         this.manuscripts = Array.isArray(response) ? response : []
       } catch (error) {
@@ -315,7 +374,7 @@ export default {
           isApprove: this.formData.isApprove,
           email: this.formData.email,
           introduction: this.formData.introduction,
-          featuredWorks: this.formData.featuredWorks
+          featuredWorks: this.formData.featuredWorks,
         }
         await this.authorRepository.save(payload, false)
         this.authorInfo = { ...this.formData }
@@ -342,12 +401,12 @@ export default {
         const payload = {
           title: this.currentManuscript.title,
           content: this.currentManuscript.content,
-          authorId: { value: this.authorId }
+          authorId: { value: this.authorId },
         }
         const isNew = !this.currentManuscript.id
         if (!isNew) {
-          payload.id = this.currentManuscript.id;
-          payload.status = this.currentManuscript.status;
+          payload.id = this.currentManuscript.id
+          payload.status = this.currentManuscript.status
         }
         await this.manuscriptRepository.save(payload, isNew)
         alert(isNew ? '새 원고가 성공적으로 작성되었습니다.' : '원고가 성공적으로 수정되었습니다.')
@@ -362,13 +421,13 @@ export default {
 
     // 원고 수정하기
     editManuscript(manuscript) {
-      this.currentManuscript = { ...manuscript };
+      this.currentManuscript = { ...manuscript }
       if (this.currentManuscript.authorId && typeof this.currentManuscript.authorId === 'string') {
-        this.currentManuscript.authorId = { value: this.currentManuscript.authorId };
+        this.currentManuscript.authorId = { value: this.currentManuscript.authorId }
       } else if (!this.currentManuscript.authorId) {
-         this.currentManuscript.authorId = { value: this.authorId };
+        this.currentManuscript.authorId = { value: this.authorId }
       }
-      this.showManuscriptDialog = true;
+      this.showManuscriptDialog = true
     },
 
     // 원고 삭제하기
@@ -389,14 +448,10 @@ export default {
     async requestPublish(manuscript) {
       const command = {
         title: manuscript.title,
-        content: manuscript.content
+        content: manuscript.content,
       }
       try {
-        await this.manuscriptRepository.invoke(
-          manuscript,
-          'requestpublish', // TODO: ManuscriptHateoasProcessor.java에 /requestpublish로 링크 수정 필요
-          command
-        )
+        await this.manuscriptRepository.invoke(manuscript, 'request-publish', command)
         alert(`"${manuscript.title}" 원고의 AI 출간 준비를 요청했습니다.`)
         await this.fetchManuscripts()
       } catch (error) {
@@ -413,19 +468,25 @@ export default {
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       })
     },
 
-    formatStatus(status) { // TODO: 백엔드랑 상의해서 status 다시 정의하기
+    formatStatus(status) {
+      // TODO: 백엔드랑 상의해서 status 다시 정의하기
       switch (status) {
-        case 'WRITING': return '작성 중'
-        case 'EDITED': return '작성 완료'
-        case 'REQUESTED': return '출간 준비 중'
-        case 'DONE': return '출간 완료'
-        default: return status
+        case 'WRITING':
+          return '작성 중'
+        case 'EDITED':
+          return '작성 완료'
+        case 'REQUESTED':
+          return '출간 준비 중'
+        case 'DONE':
+          return '출간 완료'
+        default:
+          return status
       }
-    }
-  }
+    },
+  },
 }
 </script>
