@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-8">
-    <!-- 인사말 및 승인 여부 -->
     <v-row class="mb-6">
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
@@ -19,7 +18,7 @@
               </span>
             </div>
           </div>
-          <v-btn color="primary" size="large" @click="showManuscriptDialog = true">
+          <v-btn color="primary" size="large" @click="showManuscriptDialog = true" :disabled="!authorInfo.isApprove">
             <v-icon left>mdi-plus</v-icon>
             새 원고 작성
           </v-btn>
@@ -104,18 +103,34 @@
               class="elevation-0"
             >
               <template #item.actions="{ item }">
-                <v-btn icon small color="primary" @click="viewManuscript(item)">
-                  <v-icon>mdi-eye</v-icon>
-                </v-btn>
-                <v-btn icon small color="warning" @click="editManuscript(item)">
+                <v-btn
+                  icon small color="warning"
+                  @click="editManuscript(item)"
+                  :disabled="!(item.status === 'WRITING' || item.status === 'EDITED')"
+                >
                   <v-icon>mdi-pencil</v-icon>
                 </v-btn>
-                <v-btn icon small color="error" @click="deleteManuscript(item)">
+                <v-btn
+                  icon small color="error"
+                  @click="deleteManuscript(item)"
+                  :disabled="!(item.status === 'WRITING' || item.status === 'EDITED')"
+                >
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
-                <v-btn icon small color="teal" @click="requestPublish(item)" v-if="item.status === 'EDITED'">
+                <v-btn
+                  icon small color="teal"
+                  @click="requestPublish(item)"
+                  v-if="item.status === 'EDITED' || item.status === 'REQUESTED' || item.status === 'DONE'"
+                  :disabled="item.status !== 'EDITED'"
+                >
                   <v-icon>mdi-robot</v-icon>
                 </v-btn>
+              </template>
+              <template #item.status="{ item }">
+                <span>{{ formatStatus(item.status) }}</span>
+              </template>
+              <template #item.updatedAt="{ item }">
+                <span>{{ formatDate(item.updatedAt) }}</span>
               </template>
             </VDataTable>
           </v-card-text>
@@ -142,9 +157,14 @@
               dense
               required
             />
-            <QuillEditor
+            <v-textarea
               v-model="currentManuscript.content"
-              style="height:320px"
+              placeholder="내용"
+              outlined
+              rows="16"
+              auto-grow
+              required
+              style="min-height: 300px;"
             />
           </v-card-text>
           <v-card-actions class="justify-end">
@@ -160,14 +180,12 @@
 <script>
 import BaseRepository from '@/components/repository/BaseRepository.js'
 import axios from '@/plugins/axios'
-import { QuillEditor } from 'vue3-quill'
 import { VDataTable } from 'vuetify/labs/VDataTable'
 
 export default {
   name: 'AuthorHome',
   components: {
-    VDataTable,
-    QuillEditor
+    VDataTable
   },
   data() {
     return {
@@ -273,7 +291,7 @@ export default {
           apiPath: 'manuscripts/search/findByAuthorId',
           parameters: { 'authorId.value': this.authorId }
         })
-        this.manuscripts = response
+        this.manuscripts = Array.isArray(response) ? response : []
       } catch (error) {
         alert('원고 목록을 불러오는 중 오류가 발생했습니다.')
         console.error('원고 목록 불러오기 실패:', error)
@@ -321,19 +339,36 @@ export default {
     async saveManuscript() {
       this.manuscriptError = false
       try {
-        const newManuscriptData = {
+        const payload = {
           title: this.currentManuscript.title,
           content: this.currentManuscript.content,
           authorId: { value: this.authorId }
         }
-        await this.manuscriptRepository.save(newManuscriptData, true)
-        alert('새 원고가 성공적으로 작성되었습니다.')
+        const isNew = !this.currentManuscript.id
+        if (!isNew) {
+          payload.id = this.currentManuscript.id;
+          payload.status = this.currentManuscript.status;
+        }
+        await this.manuscriptRepository.save(payload, isNew)
+        alert(isNew ? '새 원고가 성공적으로 작성되었습니다.' : '원고가 성공적으로 수정되었습니다.')
         this.closeManuscriptDialog()
         await this.fetchManuscripts()
       } catch (error) {
         this.manuscriptError = true
+        alert('원고 저장/수정에 실패했습니다. 다시 시도해 주세요.')
         console.error('원고 저장/수정 에러:', error)
       }
+    },
+
+    // 원고 수정하기
+    editManuscript(manuscript) {
+      this.currentManuscript = { ...manuscript };
+      if (this.currentManuscript.authorId && typeof this.currentManuscript.authorId === 'string') {
+        this.currentManuscript.authorId = { value: this.currentManuscript.authorId };
+      } else if (!this.currentManuscript.authorId) {
+         this.currentManuscript.authorId = { value: this.authorId };
+      }
+      this.showManuscriptDialog = true;
     },
 
     // 원고 삭제하기
