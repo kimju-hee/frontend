@@ -1,3 +1,4 @@
+import ViteYaml from '@modyfi/vite-plugin-yaml'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -8,7 +9,6 @@ import { defineConfig } from 'vite'
 import Pages from 'vite-plugin-pages'
 import Layouts from 'vite-plugin-vue-layouts'
 import vuetify from 'vite-plugin-vuetify'
-import ViteYaml from '@modyfi/vite-plugin-yaml'
 
 export default defineConfig({
   plugins: [
@@ -37,6 +37,9 @@ export default defineConfig({
     DefineOptions(),
     ViteYaml(),
   ],
+  define: {
+    __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
