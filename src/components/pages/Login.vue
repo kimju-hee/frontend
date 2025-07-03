@@ -175,6 +175,7 @@
 </template>
 
 <script>
+import BaseRepository from '@/components/repository/BaseRepository.js'
 import axios from '@/plugins/axios'
 
 export default {
@@ -195,6 +196,10 @@ export default {
       },
       signupError: false,
     }
+  },
+  created() {
+    this.userRepository = new BaseRepository(axios, 'users')
+    this.authorRepository = new BaseRepository(axios, 'authors')
   },
   methods: {
     // 로그인
@@ -217,13 +222,21 @@ export default {
           apiPath: 'users/search/findByEmail',
           parameters: { email: this.email },
         })
+
         if (users && users.length > 0) {
-          localStorage.setItem('userType', 'reader')
-          localStorage.setItem('userId', users[0].id)
-          localStorage.setItem('userName', users[0].userName)
-          alert('독자 로그인 성공!')
-          this.$router.push('/reader-home')
-          return
+          const user = users[0]
+          const userId = user._links?.self?.href ? parseInt(user._links.self.href.split('/').pop()) : null
+
+          if (userId !== null && !isNaN(userId)) {
+            localStorage.setItem('userType', 'reader')
+            localStorage.setItem('userId', userId)
+            localStorage.setItem('userName', user.userName)
+            alert('독자 로그인 성공!')
+            this.$router.push('/reader-home')
+            return
+          } else {
+            console.error('응답에서 독자 ID를 찾을 수 없습니다.')
+          }
         }
       } catch (userError) {
         console.warn('독자 로그인 실패 또는 이메일 없음:', userError)
@@ -235,13 +248,22 @@ export default {
           apiPath: 'authors/search/findByEmail',
           parameters: { email: this.email },
         })
+
         if (authors && authors.length > 0) {
-          localStorage.setItem('userType', 'author')
-          localStorage.setItem('userId', authors[0].id)
-          localStorage.setItem('userName', authors[0].authorName)
-          alert('작가 로그인 성공!')
-          this.$router.push('/author-home')
-          return
+          const author = authors[0]
+          const authorId = author._links?.self?.href ? parseInt(author._links.self.href.split('/').pop()) : null
+
+          if (authorId !== null && !isNaN(authorId)) {
+            console.log('로그인 성공 작가 id는', authors[0].id)
+            localStorage.setItem('userType', 'author')
+            localStorage.setItem('userId', authorId)
+            localStorage.setItem('userName', author.authorName)
+            alert('작가 로그인 성공!')
+            this.$router.push('/author-home')
+            return
+          } else {
+            console.error('응답에서 작가 ID를 찾을 수 없습니다.')
+          }
         }
       } catch (authorError) {
         console.warn('작가 로그인 실패 또는 이메일 없음:', authorError)
@@ -263,6 +285,8 @@ export default {
         featuredWorks: '',
       }
       this.signupRole = 'reader'
+      this.email = ''
+      this.password = ''
     },
 
     // 회원가입
@@ -273,12 +297,16 @@ export default {
         try {
           const newReader = {
             email: this.signupForm.email,
+            password: this.signupForm.password,
             userName: this.signupForm.name,
             isPurchase: false,
             message: '환영합니다!', // TODO: User.java 오타 수정 필요
           }
           await axios.post('/users', newReader)
           alert('회원가입이 완료되었습니다! 로그인 후 이용해 주세요.')
+          this.showSignupDialog = false
+          this.email = ''
+          this.password = ''
           this.$router.push('/login')
         } catch (error) {
           this.signupError = true
@@ -296,6 +324,9 @@ export default {
           }
           await axios.post('/authors', newAuthor)
           alert('회원가입이 완료되었습니다! 로그인 후 이용해 주세요.')
+          this.showSignupDialog = false
+          this.email = ''
+          this.password = ''
           this.$router.push('/login')
         } catch (error) {
           this.signupError = true
