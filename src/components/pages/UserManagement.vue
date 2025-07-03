@@ -168,6 +168,7 @@ export default {
         this.usersWithPoints = this.usersWithPoints.filter(user => user.id !== row.id)
         this.selectedRow = null
         this.showSuccess('삭제 완료!')
+        await this.fetchUsersAndPoints()
       } catch (e) {
         this.showError('삭제에 실패했습니다.', e)
       }

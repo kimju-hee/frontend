@@ -16,7 +16,7 @@
             <v-btn
               v-if="!selectedRow.isApprove"
               style="margin-left: 5px"
-              @click="approveAuthorDialog = true"
+              @click="openApproveDialog"
               class="contrast-primary-text"
               small
               color="primary"
@@ -35,15 +35,16 @@
             >
               <ApproveAuthor
                 :authorName="selectedRow?.authorName"
+                v-model="approveReason"
                 @closeDialog="approveAuthorDialog = false"
-                @approveAuthor="approveAuthor"
+                @approveAuthor="reason => approveAuthor(reason)"
               />
             </v-dialog>
 
             <v-btn
               v-if="selectedRow.isApprove"
               style="margin-left: 5px"
-              @click="disapproveAuthorDialog = true"
+              @click="openDisapproveDialog"
               class="contrast-primary-text"
               small
               color="primary"
@@ -62,8 +63,9 @@
             >
               <DisapproveAuthor
                 :authorName="selectedRow?.authorName"
+                v-model="disapproveReason"
                 @closeDialog="disapproveAuthorDialog = false"
-                @disapproveAuthor="disapproveAuthor"
+                @disapproveAuthor="reason => disapproveAuthor(reason)"
               />
             </v-dialog>
           </template>
@@ -184,6 +186,8 @@ export default {
       selectedRow: null,
       approveAuthorDialog: false,
       disapproveAuthorDialog: false,
+      approveReason: '',
+      disapproveReason: '',
       snackbar: false,
       snackbarMessage: '',
       snackbarColor: 'error',
@@ -221,28 +225,41 @@ export default {
         this.selectedRow = item
       }
     },
-    async approveAuthor(params) {
+    async approveAuthor(reason) {
       if (!this.selectedRow) return
       try {
         const path = 'approveauthor'
+        const params = {
+          approvedBy: 'admin',
+          approvalComment: reason,
+        }
         const temp = await this.repository.invoke(this.selectedRow, path, params)
         this.updateRow(temp.data)
         this.approveAuthorDialog = false
         this.selectedRow = null
+        this.approveReason = ''
         this.showSuccess('작가 승인 완료!')
+        await this.fetchAuthors()
       } catch (e) {
         this.showError('작가 승인에 실패했습니다.', e)
       }
     },
-    async disapproveAuthor(params) {
+    // TODO: 백엔드 AuthorController.java, ExternalAuthorService.java 수정 필요
+    async disapproveAuthor(reason) {
       if (!this.selectedRow) return
       try {
         const path = 'disapproveauthor'
+        const params = {
+          disapprovedBy: 'admin',
+          disapprovalComment: reason,
+        }
         const temp = await this.repository.invoke(this.selectedRow, path, params)
         this.updateRow(temp.data)
         this.disapproveAuthorDialog = false
         this.selectedRow = null
+        this.disapproveReason = ''
         this.showSuccess('작가 비승인 완료!')
+        await this.fetchAuthors()
       } catch (e) {
         this.showError('작가 비승인에 실패했습니다.', e)
       }
@@ -278,6 +295,14 @@ export default {
       this.snackbarMessage = message
       this.snackbarColor = 'success'
       this.snackbar = true
+    },
+    openApproveDialog() {
+      this.approveReason = ''
+      this.approveAuthorDialog = true
+    },
+    openDisapproveDialog() {
+      this.disapproveReason = ''
+      this.disapproveAuthorDialog = true
     },
   },
 }

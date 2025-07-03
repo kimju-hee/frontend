@@ -3,34 +3,47 @@
     <v-card-title>✅ 작가 승인</v-card-title>
     <v-card-text>
       <b>{{ authorName }}</b> 작가를 승인하시겠습니까?
+      <v-text-field
+        v-model="reason"
+        label="사유를 입력하세요"
+        variant="underlined"
+        class="mt-4"
+        required
+      />
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn color="secondary" text @click="$emit('closeDialog')">취소</v-btn>
-      <v-btn color="primary" @click="$emit('approveAuthor')">확인</v-btn>
+      <v-btn
+        color="secondary"
+        text
+        @click="$emit('closeDialog')"
+        >취소</v-btn
+      >
+      <v-btn
+        color="primary"
+        @click="onApprove"
+        :disabled="!reason"
+        >확인</v-btn
+      >
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue'
 
-const props = defineProps({ authorName: String });
+const props = defineProps({
+  authorName: String,
+  modelValue: String,
+})
+const emit = defineEmits(['closeDialog', 'approveAuthor', 'update:modelValue'])
 
-const emit = defineEmits(['closeDialog', 'approveAuthor']);
+const reason = computed({
+  get: () => props.modelValue,
+  set: val => emit('update:modelValue', val),
+})
 
-const editMode = ref(true);
-const value = ref({ isApprove: false });
-
-const approveAuthor = () => {
-  emit('approveAuthor', value.value);
-};
-
-const close = () => {
-  emit('closeDialog');
-};
-
-const change = () => {
-  emit("update:modelValue", value.value);
-};
+function onApprove() {
+  emit('approveAuthor', reason.value)
+}
 </script>
