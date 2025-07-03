@@ -1,14 +1,11 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useDisplay } from 'vuetify'
-import { useRouter } from 'vue-router'
 
 const props = defineProps({
   tag: {
-    type: [
-      String,
-      null,
-    ],
+    type: [String, null],
     required: false,
     default: 'aside',
   },
@@ -27,12 +24,15 @@ const refNav = ref()
 const route = useRoute()
 const router = useRouter()
 
-watch(() => route.path, () => {
-  props.toggleIsOverlayNavActive(false)
-})
+watch(
+  () => route.path,
+  () => {
+    props.toggleIsOverlayNavActive(false)
+  },
+)
 
 const isVerticalNavScrolled = ref(false)
-const updateIsVerticalNavScrolled = val => isVerticalNavScrolled.value = val
+const updateIsVerticalNavScrolled = val => (isVerticalNavScrolled.value = val)
 
 const handleNavScroll = evt => {
   isVerticalNavScrolled.value = evt.target.scrollTop > 0
@@ -41,7 +41,7 @@ const handleNavScroll = evt => {
 const navigateToHome = () => {
   const userType = localStorage.getItem('userType')
   let targetPath = '/'
-  
+
   if (userType === 'admin') {
     targetPath = '/admin-home'
   } else if (userType === 'author') {
@@ -49,7 +49,7 @@ const navigateToHome = () => {
   } else if (userType === 'reader') {
     targetPath = '/reader-home'
   }
-  
+
   router.push(targetPath)
 }
 </script>
@@ -61,8 +61,8 @@ const navigateToHome = () => {
     class="layout-vertical-nav"
     :class="[
       {
-        'visible': isOverlayNavActive,
-        'scrolled': isVerticalNavScrolled,
+        visible: isOverlayNavActive,
+        scrolled: isVerticalNavScrolled,
         'overlay-nav': mdAndDown,
       },
     ]"
@@ -72,13 +72,10 @@ const navigateToHome = () => {
       <slot name="nav-header">
         <div
           class="app-logo d-flex align-center gap-x-3 app-title-wrapper"
-          style="cursor: pointer;"
+          style="cursor: pointer"
           @click="navigateToHome"
         >
-          <v-icon>mdi-home</v-icon>
-          <h1 class="font-weight-medium leading-normal text-xl text-uppercase">
-            걷기가서재
-          </h1>
+          <h1 class="font-weight-medium leading-normal text-xl text-uppercase">걷기가서재</h1>
         </div>
       </slot>
     </div>
@@ -104,8 +101,8 @@ const navigateToHome = () => {
 </template>
 
 <style lang="scss">
-@use "@configured-variables" as variables;
-@use "@layouts/styles/mixins";
+@use '@configured-variables' as variables;
+@use '@layouts/styles/mixins';
 
 // 👉 Vertical Nav
 .layout-vertical-nav {

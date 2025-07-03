@@ -2,7 +2,6 @@
 import { VerticalNavLayout } from '@layouts'
 
 // Components
-import Footer from '@/layouts/components/Footer.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 </script>
 
@@ -26,5 +25,4 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
   </VerticalNavLayout>
 </template>
 
-<style lang="scss" scoped>
-</style> 
+<style lang="scss" scoped></style>

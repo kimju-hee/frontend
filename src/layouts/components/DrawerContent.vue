@@ -1,8 +1,5 @@
 <script setup>
-import {
-  VerticalNavLink,
-  VerticalNavSectionTitle,
-} from '@layouts'
+import { VerticalNavLink, VerticalNavSectionTitle } from '@layouts'
 </script>
 
 <template>
@@ -28,7 +25,7 @@ import {
     />
     <VerticalNavLink
       :item="{
-        title: 'AI 처리 결과',
+        title: 'AI 출간 처리 결과',
         to: '/ai-result',
       }"
     />

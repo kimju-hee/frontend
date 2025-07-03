@@ -12,19 +12,10 @@ const avatarBadgeProps = {
   bordered: true,
 }
 
-const userName = localStorage.getItem('userName') || "USER"
+const userName = localStorage.getItem('userName') || 'USER'
 
 const handleLogout = () => {
-  // localStorage 초기화
   localStorage.clear()
-  
-  // 또는 특정 키만 삭제하려면:
-  // localStorage.removeItem('userId')
-  // localStorage.removeItem('userName')
-  // localStorage.removeItem('userRole')
-  // localStorage.removeItem('token')
-  
-  // 로그인 페이지로 이동
   router.push('/login')
 }
 </script>
@@ -32,7 +23,7 @@ const handleLogout = () => {
 <template>
   <VBadge v-bind="avatarBadgeProps">
     <VAvatar
-      style="cursor: pointer;"
+      style="cursor: pointer"
       color="primary"
       variant="tonal"
     >
@@ -68,7 +59,7 @@ const handleLogout = () => {
           </VListItem>
 
           <VDivider class="my-2" />
-          
+
           <!-- 👉 Logout -->
           <VListItem @click="handleLogout">
             <template #prepend>

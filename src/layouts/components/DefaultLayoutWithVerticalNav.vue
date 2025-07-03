@@ -3,7 +3,6 @@ import { VerticalNavLayout } from '@layouts'
 
 // Components
 import DrawerContent from '@/layouts/components/DrawerContent.vue'
-import Footer from '@/layouts/components/Footer.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 </script>
 
@@ -13,12 +12,14 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">
         <!-- 👉 Vertical nav toggle in overlay mode -->
-        <IconBtn
+        <v-btn
           class="ms-n3 d-lg-none"
           @click="toggleVerticalOverlayNavActive(true)"
+          icon
+          variant="plain"
         >
           <VIcon icon="mdi-menu" />
-        </IconBtn>
+        </v-btn>
 
         <VSpacer />
 
@@ -40,5 +41,4 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
   </VerticalNavLayout>
 </template>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
