@@ -254,7 +254,6 @@ export default {
           const authorId = author._links?.self?.href ? parseInt(author._links.self.href.split('/').pop()) : null
 
           if (authorId !== null && !isNaN(authorId)) {
-            console.log('로그인 성공 작가 id는', authors[0].id)
             localStorage.setItem('userType', 'author')
             localStorage.setItem('userId', authorId)
             localStorage.setItem('userName', author.authorName)

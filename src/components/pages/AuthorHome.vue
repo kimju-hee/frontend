@@ -290,6 +290,9 @@ export default {
         status: null,
       },
       manuscriptError: false,
+      snackbar: false,
+      snackbarMessage: '',
+      snackbarColor: 'error',
     }
   },
   computed: {
@@ -313,10 +316,16 @@ export default {
   async created() {
     this.authorRepository = new BaseRepository(axios, 'authors')
     this.manuscriptRepository = new BaseRepository(axios, 'manuscripts')
-    this.authorId = localStorage.getItem('userId')
-    if (!this.authorId || localStorage.getItem('userType') !== 'author') {
-      // alert('유효한 작가 정보가 없습니다. 로그인 페이지로 이동합니다.')
-      // this.$router.push('/login')
+    const storedUserId = localStorage.getItem('userId')
+    this.authorId = storedUserId ? Number(storedUserId) : null
+    if (
+      typeof this.authorId !== 'number' ||
+      isNaN(this.authorId) ||
+      this.authorId === null ||
+      localStorage.getItem('userType') !== 'author'
+    ) {
+      alert('유효한 작가 정보가 없습니다. 로그인 페이지로 이동합니다.')
+      this.$router.push('/login')
       return
     }
     await this.fetchAuthorInfo()
@@ -341,13 +350,13 @@ export default {
             featuredWorks: response.featuredWorks,
           }
         } else {
-          // alert('작가 정보를 찾을 수 없습니다.')
-          // this.$router.push('/login')
+          alert('작가 정보를 찾을 수 없습니다.')
+          this.$router.push('/login')
         }
       } catch (error) {
-        // alert('작가 정보를 불러오는 중 오류가 발생했습니다.')
+        alert('작가 정보를 불러오는 중 오류가 발생했습니다.')
         console.error('작가 정보 불러오기 실패:', error)
-        // this.$router.push('/login')
+        this.$router.push('/login')
       }
     },
     // 작가의 원고 목록 불러오기
@@ -360,7 +369,6 @@ export default {
         this.manuscripts = Array.isArray(response) ? response : []
       } catch (error) {
         this.showError('원고 목록을 불러오는 중 오류가 발생했습니다.', error)
-        console.error('원고 목록 불러오기 실패:', error)
       }
     },
     startEditMode() {
@@ -388,7 +396,6 @@ export default {
         await this.fetchAuthorInfo()
       } catch (error) {
         this.showError('정보 수정에 실패했습니다. 다시 시도해 주세요.', error)
-        console.error('작가 정보 수정 실패:', error)
       }
     },
     // 새 원고 작성 다이얼로그 닫기
@@ -397,7 +404,7 @@ export default {
       this.currentManuscript = { id: null, title: '', content: '', authorId: null, status: null }
       this.manuscriptError = false
     },
-    // 원고 저장하기
+    // 원고 저장하기 TODO: 길이 제한 너무 짧아요
     async saveManuscript() {
       this.manuscriptError = false
       try {
@@ -418,7 +425,6 @@ export default {
       } catch (error) {
         this.manuscriptError = true
         this.showError('원고 저장/수정에 실패했습니다. 다시 시도해 주세요.', error)
-        console.error('원고 저장/수정 실패:', error)
       }
     },
     // 원고 수정하기
@@ -440,7 +446,6 @@ export default {
           await this.fetchManuscripts()
         } catch (error) {
           this.showError('원고 삭제에 실패했습니다.', error)
-          console.error('원고 삭제 실패:', error)
         }
       }
     },
@@ -456,7 +461,6 @@ export default {
         await this.fetchManuscripts()
       } catch (error) {
         this.showError('AI 출간 준비 요청에 실패했습니다.', error)
-        console.error('AI 출간 준비 요청 실패:', error)
       }
     },
     formatDate(dateString) {
