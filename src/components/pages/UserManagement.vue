@@ -123,6 +123,11 @@ export default {
   },
   async created() {
     this.repository = new BaseRepository(axios, this.path)
+    if (localStorage.getItem('userType') !== 'admin') {
+      alert('잘못된 접근입니다. 로그인 페이지로 이동합니다.')
+      this.$router.push('/login')
+      return
+    }
     await this.fetchUsersAndPoints()
   },
   methods: {

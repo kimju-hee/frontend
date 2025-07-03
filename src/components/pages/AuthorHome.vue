@@ -233,6 +233,14 @@
         </v-form>
       </v-card>
     </v-dialog>
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      timeout="3000"
+      location="top"
+    >
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -342,7 +350,6 @@ export default {
         // this.$router.push('/login')
       }
     },
-
     // 작가의 원고 목록 불러오기
     async fetchManuscripts() {
       try {
@@ -352,11 +359,10 @@ export default {
         })
         this.manuscripts = Array.isArray(response) ? response : []
       } catch (error) {
-        alert('원고 목록을 불러오는 중 오류가 발생했습니다.')
+        this.showError('원고 목록을 불러오는 중 오류가 발생했습니다.', error)
         console.error('원고 목록 불러오기 실패:', error)
       }
     },
-
     startEditMode() {
       this.formData = { ...this.authorInfo }
       this.editMode = true
@@ -364,7 +370,6 @@ export default {
     cancelEditMode() {
       this.editMode = false
     },
-
     // 작가의 정보 수정하기
     async saveAuthorInfo() {
       try {
@@ -378,22 +383,20 @@ export default {
         }
         await this.authorRepository.save(payload, false)
         this.authorInfo = { ...this.formData }
-        alert('작가 정보가 성공적으로 수정되었습니다.')
+        this.showSuccess('정보 수정 완료!')
         this.editMode = false
         await this.fetchAuthorInfo()
       } catch (error) {
-        alert('정보 수정에 실패했습니다. 다시 시도해 주세요.')
+        this.showError('정보 수정에 실패했습니다. 다시 시도해 주세요.', error)
         console.error('작가 정보 수정 실패:', error)
       }
     },
-
     // 새 원고 작성 다이얼로그 닫기
     closeManuscriptDialog() {
       this.showManuscriptDialog = false
       this.currentManuscript = { id: null, title: '', content: '', authorId: null, status: null }
       this.manuscriptError = false
     },
-
     // 원고 저장하기
     async saveManuscript() {
       this.manuscriptError = false
@@ -409,16 +412,15 @@ export default {
           payload.status = this.currentManuscript.status
         }
         await this.manuscriptRepository.save(payload, isNew)
-        alert(isNew ? '새 원고가 성공적으로 작성되었습니다.' : '원고가 성공적으로 수정되었습니다.')
+        this.showSuccess(isNew ? '원고 작성 완료!' : '원고 수정 완료!')
         this.closeManuscriptDialog()
         await this.fetchManuscripts()
       } catch (error) {
         this.manuscriptError = true
-        alert('원고 저장/수정에 실패했습니다. 다시 시도해 주세요.')
-        console.error('원고 저장/수정 에러:', error)
+        this.showError('원고 저장/수정에 실패했습니다. 다시 시도해 주세요.', error)
+        console.error('원고 저장/수정 실패:', error)
       }
     },
-
     // 원고 수정하기
     editManuscript(manuscript) {
       this.currentManuscript = { ...manuscript }
@@ -429,21 +431,19 @@ export default {
       }
       this.showManuscriptDialog = true
     },
-
     // 원고 삭제하기
     async deleteManuscript(manuscript) {
       if (confirm(`"${manuscript.title}" 원고를 정말 삭제하시겠습니까?`)) {
         try {
           await this.manuscriptRepository.delete(manuscript)
-          alert('원고가 삭제되었습니다.')
+          this.showSuccess('원고 삭제 완료!')
           await this.fetchManuscripts()
         } catch (error) {
-          alert('원고 삭제 실패: ' + (error.response?.data?.message || error.message))
-          console.error('원고 삭제 에러:', error)
+          this.showError('원고 삭제에 실패했습니다.', error)
+          console.error('원고 삭제 실패:', error)
         }
       }
     },
-
     // AI 출간 준비 요청하기
     async requestPublish(manuscript) {
       const command = {
@@ -452,14 +452,13 @@ export default {
       }
       try {
         await this.manuscriptRepository.invoke(manuscript, 'request-publish', command)
-        alert(`"${manuscript.title}" 원고의 AI 출간 준비를 요청했습니다.`)
+        this.showSuccess(`"${manuscript.title}" 원고 AI 출간 준비 요청 완료!`)
         await this.fetchManuscripts()
       } catch (error) {
-        alert('AI 출간 준비 요청 실패: ' + (error.response?.data?.message || error.message))
-        console.error('AI 출간 준비 요청 에러:', error)
+        this.showError('AI 출간 준비 요청에 실패했습니다.', error)
+        console.error('AI 출간 준비 요청 실패:', error)
       }
     },
-
     formatDate(dateString) {
       if (!dateString) return ''
       const date = new Date(dateString)
@@ -471,9 +470,7 @@ export default {
         minute: '2-digit',
       })
     },
-
     formatStatus(status) {
-      // TODO: 백엔드랑 상의해서 status 다시 정의하기
       switch (status) {
         case 'WRITING':
           return '작성 중'
@@ -486,6 +483,21 @@ export default {
         default:
           return status
       }
+    },
+    showError(message, error) {
+      this.snackbarMessage = message
+      this.snackbarColor = 'error'
+      this.snackbar = true
+      if (error) {
+        console.error(message, error)
+      } else {
+        console.error(message)
+      }
+    },
+    showSuccess(message) {
+      this.snackbarMessage = message
+      this.snackbarColor = 'success'
+      this.snackbar = true
     },
   },
 }
