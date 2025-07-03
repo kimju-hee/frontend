@@ -66,10 +66,23 @@ export default class BaseRepository {
   }
 
   async save(entity, isNew) {
-    if (isNew) {
-      return await this.axios.post(this.fixUrl(`/${this.path}`), entity)
-    } else {
-      return await this.axios.put(this.fixUrl(entity._links.self.href), entity)
+    try {
+      let response
+      if (isNew) {
+        // 생성 (POST)
+        response = await this.axios.post(`/${this.path}`, entity)
+      } else {
+        // 업데이트 (PUT)
+        // 변경된 부분: HATEOAS _links 대신 entity.id를 사용하여 URL 구성
+        if (!entity.id) {
+          throw new Error('Cannot update entity without an ID.')
+        }
+        response = await this.axios.put(`/${this.path}/${entity.id}`, entity)
+      }
+      return response.data
+    } catch (e) {
+      console.error(`Error saving resource ${this.path}:`, e)
+      throw e
     }
   }
 

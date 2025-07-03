@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -76,7 +76,11 @@ const router = createRouter({
       path: '/book-list',
       component: () => import('../components/pages/BookList.vue'),
     },
+    {
+      path: '/book/:id',
+      component: () => import('../components/pages/BookDetail.vue'),
+    },
   ],
 })
 
-export default router;
+export default router
