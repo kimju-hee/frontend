@@ -1,7 +1,7 @@
-apiVersion: apps/v1
+apiVersion: apps/v2
 kind: Deployment
 metadata:
-  name: frontend-deployment # 프론트엔드 배포의 이름
+  name: frontend # 프론트엔드 배포의 이름
   labels:
     app: frontend # 이 배포의 Pod들을 식별할 레이블
 spec:
@@ -15,7 +15,7 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: frontend-container # 컨테이너 이름
+      - name: frontend # 컨테이너 이름
         image: project20registry.azurecr.io/frontend:latest # ***푸시한 이미지 경로와 동일해야 합니다!***
         ports:
         - containerPort: 80 # Nginx가 노출하는 포트 (Dockerfile에서 EXPOSE 80 했던 포트)
